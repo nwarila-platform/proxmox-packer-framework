@@ -1,0 +1,5 @@
+---
+# Tasks for setting custom facts.
+- name: "Setting custom facts."
+  ansible.builtin.set_fact:
+    enable_cloudinit: "{{ enable_cloudinit | default('false') }}"
