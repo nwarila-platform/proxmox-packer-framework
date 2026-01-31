@@ -1,0 +1,44 @@
+name: Feature Push Gate
+on:
+  push:
+    branches-ignore: [ 'DEV', 'TEST', 'PROD' ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Download GitHub Repo the GIT tool
+        uses: actions/checkout@v6
+        with:
+          repository: "${{ github.repository }}"
+          ref: "${{ github.ref }}"
+          token: "${{ github.token }}"
+          persist-credentials: false
+          path: './'
+          clean: true
+          filter: null
+          sparse-checkout: null
+          sparse-checkout-cone-mode: true
+          fetch-depth: 0
+          fetch-tags: false
+          show-progress: true
+          lfs: false
+          submodules: false
+          set-safe-directory: true
+          github-server-url: 'https://github.com'
+
+      - name: Perform Secrets Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITLEAKS_NOTIFY_USER_LIST: "@NWarila"
+          GITLEAKS_ENABLE_COMMENTS: true
+          GITLEAKS_CONFIG: "${{ github.workspace }}/.github/config/gitleaks.toml"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+          GITLEAKS_ENABLE_SUMMARY: true
+          GITLEAKS_VERSION: 'latest'

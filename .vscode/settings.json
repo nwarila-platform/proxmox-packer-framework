@@ -1,0 +1,31 @@
+{
+  //region ------ [ VSCode Native Settings ] ------------------------------- #
+  
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.autoIndent": "advanced",
+  "editor.rulers": [
+    { "color": "#9a4dff", "column": 98 },
+    { "color": "#5e4e72", "column": 96 },
+  ],
+
+  //endregion --- [ VSCode Native Settings ] ------------------------------- #
+
+  //region ------ [ VSCode Native Settings ] ------------------------------- #
+
+  //region ------ [ Extensions ] ------------------------------------------- #
+
+    //region ------ [ Extensions: Explicit Folding ] ----------------------- #
+
+    "explicitFolding.rules": {
+        "*": {
+            "beginRegex": "^[\\s]*#region ------ \\[.*\\] -+ #[\\s]*$",
+            "endRegex":   "^[\\s]*#endregion --- \\[.*\\] -+ #[\\s]*$"
+        }
+    },
+
+    //endregion --- [ Extensions: Explicit Folding ] ------------------------- #
+
+  //endregion --- [ Extenions ] ---------------------------------------------- #
+
+}

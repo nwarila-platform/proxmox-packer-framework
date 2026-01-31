@@ -1,0 +1,81 @@
+name: DEV -> TEST Promotion Gate
+on:
+  push:
+    branches: [ 'DEV' ]
+    paths: [ 'packer/**' ]
+  workflow_dispatch:
+
+jobs:
+  packer_checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      
+    steps:
+    
+      - name: Download GitHub Repo the GIT tool
+        uses: actions/checkout@v6
+        with:
+          repository: "${{ github.repository }}"
+          ref: "${{ github.ref }}"
+          token: "${{ github.token }}"
+          persist-credentials: false
+          path: './'
+          clean: true
+          filter: null
+          sparse-checkout: null
+          sparse-checkout-cone-mode: true
+          fetch-depth: 0
+          fetch-tags: false
+          show-progress: true
+          lfs: false
+          submodules: false
+          set-safe-directory: true
+          github-server-url: 'https://github.com'
+
+      - name: Perform Secrets Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITLEAKS_NOTIFY_USER_LIST: "@NWarila"
+          GITLEAKS_ENABLE_COMMENTS: true
+          GITLEAKS_CONFIG: "${{ github.workspace }}/.github/config/gitleaks.toml"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+          GITLEAKS_ENABLE_SUMMARY: true
+          GITLEAKS_VERSION: 'latest'
+          
+      - name: Get Packer version
+        working-directory: "${{ github.workspace }}/packer/"
+        shell: bash
+        run: "bash ${{ github.workspace }}/.github/scripts/get_packer_version.sh"
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v3.1.0
+        id: setup
+        with:
+          version: "${{ env.PACKER_VERSION }}"
+
+      - name: Packer init
+        working-directory: "${{ github.workspace }}/packer/"
+        run: packer init .
+
+      - name: Run packer fmt (check)
+        working-directory: "${{ github.workspace }}/packer/"
+        run: |
+          packer fmt -check -recursive .
+          if [ $? -ne 0 ]; then
+            echo "::error::Packer files need formatting. Run: packer fmt -recursive ./packer"
+            exit 1
+          fi
+
+      - name: Run packer validate
+        working-directory: "${{ github.workspace }}/packer/"
+        run: |
+          if ! packer validate                                                     \
+            -var-file="${{ github.workspace }}/examples/rocky-linux-9.pkrvars.hcl" \
+            -var-file="${{ github.workspace }}/examples/secrets.pkrvars.hcl"       \
+            "${{ github.workspace }}/packer/"; then
+            echo "::error::Packer files are invalid"
+            exit 1
+          fi
