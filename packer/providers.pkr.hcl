@@ -7,7 +7,7 @@
 packer {
 
   // Declare required Packer version.
-  required_version = "1.14.2"
+  required_version = "1.15.0"
 
   required_plugins {
     ansible = {
