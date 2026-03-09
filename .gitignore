@@ -1,0 +1,85 @@
+# Ignore everything by default
+**
+
+# --- Root ---
+!.gitignore
+!.gitattributes
+!CHANGELOG.md
+!CODE_OF_CONDUCT.md
+!CONTRIBUTING.md
+!LICENSE
+!README.md
+!SECURITY.md
+
+# --- .github ---
+!.github/
+!.github/**
+
+# --- .vscode ---
+!.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# --- examples ---
+!examples/
+!examples/.gitkeep
+!examples/rocky-linux-9.pkrvars.hcl
+!examples/secrets.pkrvars.hcl
+
+# --- packer root ---
+!packer/
+!packer/.gitkeep
+!packer/builds.pkr.hcl
+!packer/data.pkr.hcl
+!packer/locals.pkr.hcl
+!packer/providers.pkr.hcl
+!packer/source.pkr.hcl
+!packer/variables.pkr.hcl
+
+# --- packer/data ---
+!packer/data/
+!packer/data/ks.pkrtpl.hcl
+!packer/data/network.pkrtpl.hcl
+!packer/data/storage.pkrtpl.hcl
+
+# --- packer/templates ---
+!packer/templates/
+!packer/templates/.gitkeep
+!packer/templates/ks.pkrtpl.hcl
+
+# --- packer/ansible ---
+!packer/ansible/
+!packer/ansible/ansible.cfg
+!packer/ansible/linux-playbook.yml
+!packer/ansible/linux-requirements.yml
+
+# --- packer/ansible/roles ---
+!packer/ansible/roles/
+!packer/ansible/roles/base/
+!packer/ansible/roles/base/defaults/
+!packer/ansible/roles/base/defaults/main.yml
+!packer/ansible/roles/base/tasks/
+!packer/ansible/roles/base/tasks/main.yml
+!packer/ansible/roles/base/vars/
+!packer/ansible/roles/base/vars/main.yml
+!packer/ansible/roles/clean/
+!packer/ansible/roles/clean/tasks/
+!packer/ansible/roles/clean/tasks/main.yml
+!packer/ansible/roles/clean/vars/
+!packer/ansible/roles/clean/vars/main.yml
+!packer/ansible/roles/configure/
+!packer/ansible/roles/configure/tasks/
+!packer/ansible/roles/configure/tasks/main.yml
+!packer/ansible/roles/configure/vars/
+!packer/ansible/roles/configure/vars/main.yml
+!packer/ansible/roles/users/
+!packer/ansible/roles/users/tasks/
+!packer/ansible/roles/users/tasks/main.yml
+!packer/ansible/roles/users/vars/
+!packer/ansible/roles/users/vars/main.yml
+
+# --- packer/artifacts, manifests (keep dir, not contents) ---
+!packer/artifacts/
+!packer/artifacts/.gitkeep
+!packer/manifests/
+!packer/manifests/.gitkeep
