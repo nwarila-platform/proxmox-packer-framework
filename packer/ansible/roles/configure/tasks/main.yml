@@ -35,7 +35,7 @@
         msg: "Configuring cloud-init"
     - name: "Add Proxmox datasource"
       ansible.builtin.copy:
-        content: "datasource_list: [ NoCloud, ConfigDrive ]"
+        content: "datasource_list: [ NoCloud, ConfigDrive, None  ]"
         dest: /etc/cloud/cloud.cfg.d/99_pve.cfg
     - name: Enable cloud-init services
       ansible.builtin.service:
@@ -54,3 +54,14 @@
     name: sshd
     state: restarted
     daemon_reload: true
+
+# Allow System To Read Cloud-Init Config From CDROM
+- name: "Add isofs module to initramfs for cloud-init CDROM detection."
+  ansible.builtin.copy:
+    content: 'add_drivers+=" isofs "'
+    dest: /etc/dracut.conf.d/isofs.conf
+
+- name: "Rebuild initramfs with isofs module."
+  ansible.builtin.command:
+    cmd: dracut --force
+  changed_when: true
