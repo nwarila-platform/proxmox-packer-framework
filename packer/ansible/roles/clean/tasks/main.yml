@@ -95,7 +95,7 @@
     state: absent
   
 # Tasks to clean the NetworkManager state.
-- name: "Removing stale NetworkManager connections."
+- name: "Finding stale NetworkManager connections."
   ansible.builtin.find:
     paths: /etc/NetworkManager/system-connections
     patterns: '*.nmconnection'

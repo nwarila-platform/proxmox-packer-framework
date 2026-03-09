@@ -4,12 +4,23 @@
 # --- Root ---
 !.gitignore
 !.gitattributes
+!.editorconfig
+!.pre-commit.config.yaml
+!.release-please-manifest.json
+!release-please-config.json
 !CHANGELOG.md
 !CODE_OF_CONDUCT.md
 !CONTRIBUTING.md
 !LICENSE
 !README.md
 !SECURITY.md
+!SUPPORT.md
+
+# --- .config ---
+!.config/
+!.config/.ansible-lint.yml
+!.config/.markdownlint.json
+!.config/.yamllint.yaml
 
 # --- .github ---
 !.github/
@@ -19,6 +30,7 @@
 !.vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/tasks.json
 
 # --- examples ---
 !examples/

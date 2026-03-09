@@ -24,12 +24,6 @@ variable "proxmox_api_token_secret" {
   sensitive   = true
 }
 
-variable "proxmox_skip_tls_verify" {
-  description = "true/false to skip Proxmox TLS certificate checks."
-  type        = bool
-  default     = false
-}
-
 #endregion --- [ Proxmox Settings ] ----------------------------------------------------------- #
 
 #region ------ [ Packer Settings ] ------------------------------------------------------------ #
@@ -57,7 +51,7 @@ variable "deploy_user_key" {
 #region ------ [ Packer Image ] --------------------------------------------------------------- #
 
 variable "packer_image" {
-  description = ""
+  description = "The primary configuration object for the Proxmox VM template. Defines OS metadata, hardware specs, boot settings, cloud-init options, and Proxmox placement (node, pool, VM ID)."
   type = object({
 
     # Proxmox Settings
@@ -192,7 +186,7 @@ variable "disks" {
 }
 
 variable "efi_config" {
-  description = ""
+  description = "UEFI firmware configuration for the VM. Controls EFI disk format, storage pool, EFI type (2m/4m), and whether Microsoft Secure Boot keys are pre-enrolled."
   type = object({
     efi_format        = string
     efi_storage_pool  = string

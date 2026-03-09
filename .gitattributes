@@ -1,0 +1,114 @@
+#region ------ [ Header ] -------------------------------------------------------------------- #
+#                  /$$ /$$                   /$$   /$$                   /$$                   #
+#                 |__/| $$                  | $$  | $$                  | $$                   #
+#   /$$$$$$  /$$  /$$ | $$$$$$$  /$$$$$$  /$$$$$$| $$$$$$$   /$$$$$$  /$$$$$$  /$$$$$$        #
+#  /$$__  $$| $$ | $$| $$__  $$/$$__  $$|_  $$_/| $$__  $$ /$$__  $$|_  $$_/ /$$__  $$       #
+# | $$  \ $$| $$ | $$| $$  \ $$| $$  \ $$  | $$  | $$  \ $$| $$  \__/  | $$  | $$$$$$$$      #
+# | $$  | $$| $$ | $$| $$  | $$| $$  | $$  | $$ /$$| $$  | $$| $$      | $$ /$$| $$_____/     #
+# |  $$$$$$$|  $$$$$$/| $$$$$$$/|  $$$$$$/  |  $$$$/| $$  | $$| $$      |  $$$$/|  $$$$$$$     #
+#  \____  $$ \______/ |_______/  \______/    \___/  |__/  |__/|__/       \___/   \_______/    #
+#       | $$                                                                                   #
+#       | $$                                                                                   #
+#       |__/                                                                                   #
+# --- [ DESCRIPTION ] ------------------------------------------------------------------------ #
+#%   A '.gitattributes' file defines per-path attributes that control how Git handles files.  %#
+#%   This file enforces consistent line endings, configures diff drivers, registers GitHub    %#
+#%   Linguist overrides for accurate language detection, and controls what is included in     %#
+#%   release archives (git archive / GitHub releases).                                        %#
+#%                                                                                            %#
+#% ADDITIONAL INFORMATION                                                                     %#
+#%   Official Git Documentation: https://git-scm.com/docs/gitattributes                      %#
+#%                                                                                            %#
+#endregion --- [ Header ] -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------- #
+#  Global default — normalize all text files to LF on commit                 #
+#  eol=lf enforced cross-platform (Linux CI + Windows self-hosted runners)   #
+# -------------------------------------------------------------------------- #
+* text=auto eol=lf
+
+# -------------------------------------------------------------------------- #
+#  Packer & HCL                                                              #
+# -------------------------------------------------------------------------- #
+*.pkr.hcl       text eol=lf
+*.pkrvars.hcl   text eol=lf
+*.pkrtpl.hcl    text eol=lf
+*.hcl           text eol=lf
+
+# -------------------------------------------------------------------------- #
+#  Ansible & YAML                                                            #
+# -------------------------------------------------------------------------- #
+*.yaml          text eol=lf diff=yaml
+*.yml           text eol=lf diff=yaml
+*.cfg           text eol=lf
+
+# -------------------------------------------------------------------------- #
+#  Markdown                                                                   #
+# -------------------------------------------------------------------------- #
+*.md            text eol=lf diff=markdown
+
+# -------------------------------------------------------------------------- #
+#  JSON — VSCode settings, config files                                      #
+# -------------------------------------------------------------------------- #
+*.json          text eol=lf
+
+# -------------------------------------------------------------------------- #
+#  TOML — gitleaks config                                                    #
+# -------------------------------------------------------------------------- #
+*.toml          text eol=lf
+
+# -------------------------------------------------------------------------- #
+#  Shell scripts                                                              #
+# -------------------------------------------------------------------------- #
+*.sh            text eol=lf
+
+# -------------------------------------------------------------------------- #
+#  Keepfiles                                                                  #
+# -------------------------------------------------------------------------- #
+.gitkeep        text eol=lf
+
+# -------------------------------------------------------------------------- #
+#  Merge strategy                                                             #
+#  CHANGELOG.md is managed by release-please — union prevents write conflicts#
+# -------------------------------------------------------------------------- #
+CHANGELOG.md    merge=union
+
+# -------------------------------------------------------------------------- #
+#  GitHub Linguist — language detection overrides                            #
+#  Without these, YAML and Markdown volume skews repo language stats         #
+# -------------------------------------------------------------------------- #
+
+# Primary language: HCL (Packer)
+*.pkr.hcl       linguist-language=HCL linguist-detectable=true
+*.pkrvars.hcl   linguist-language=HCL linguist-detectable=true
+*.pkrtpl.hcl    linguist-language=HCL linguist-detectable=true
+*.hcl           linguist-language=HCL linguist-detectable=true
+
+# Classify documentation as non-code for language stats
+docs/           linguist-documentation=true
+*.md            linguist-documentation=true
+
+# Classify CI/CD infrastructure and tooling as non-primary
+.github/        linguist-generated=false linguist-detectable=false
+.config/        linguist-detectable=false
+.vscode/        linguist-detectable=false
+
+# -------------------------------------------------------------------------- #
+#  Export-ignore — excluded from git archive and GitHub release tarballs     #
+#  Consumers of this framework only need packer/ and examples/               #
+# -------------------------------------------------------------------------- #
+.config/                    export-ignore
+.github/                    export-ignore
+.vscode/                    export-ignore
+.claude/                    export-ignore
+.gitattributes              export-ignore
+.gitignore                  export-ignore
+.editorconfig               export-ignore
+.pre-commit.config.yaml     export-ignore
+.release-please-manifest.json export-ignore
+release-please-config.json  export-ignore
+CHANGELOG.md                export-ignore
+CODE_OF_CONDUCT.md          export-ignore
+CONTRIBUTING.md             export-ignore
+SECURITY.md                 export-ignore
+SUPPORT.md                  export-ignore

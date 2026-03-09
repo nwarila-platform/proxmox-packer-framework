@@ -1,0 +1,15 @@
+#region ------ [ Header ] -------------------------------------------------------------------- #
+#  File: /.github/FUNDING.yml                                                                  #
+# --- [ Description ] ------------------------------------------------------------------------ #
+#  This file tells GitHub which funding links to show for this repository. GitHub uses it     #
+#  to populate the Sponsor button with supported funding platforms or custom URLs, so people   #
+#  who want to support the project can see the intended path clearly. In an open, educational  #
+#  project, it makes financial support transparent and easy to discover.                       #
+# --- [ Official GitHub references ] --------------------------------------------------------- #
+#  - Sponsor button + FUNDING.yml syntax: https://docs.github.com/en/repositories/managing-    #
+#      your-repositorys-settings-and-features/customizing-your-repository/displaying-a-        #
+#      sponsor-button-in-your-repository                                                       #
+#  - GitHub Sponsors overview: https://docs.github.com/en/sponsors/getting-started-with-       #
+#      github-sponsors/about-github-sponsors                                                   #
+#endregion --- [ Header ] -------------------------------------------------------------------- #
+github: NWarila

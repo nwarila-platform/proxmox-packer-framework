@@ -1,0 +1,116 @@
+---
+# .yamllint.yaml
+# Hardened, explicit yamllint configuration
+
+extends: default
+
+yaml-files:
+  - '.yamllint'
+  - '*.yaml'
+  - '*.yml'
+
+ignore: .git/
+
+rules:
+  # Correctness / ambiguity reduction
+  anchors:
+    forbid-duplicated-anchors: true
+    forbid-undeclared-aliases: true
+    forbid-unused-anchors: false
+    level: error
+
+  key-duplicates:
+    forbid-duplicated-merge-keys: true
+    level: error
+
+  empty-values:
+    forbid-in-block-mappings: true
+    forbid-in-block-sequences: true
+    forbid-in-flow-mappings: true
+    level: error
+
+  octal-values:
+    forbid-explicit-octal: true
+    forbid-implicit-octal: true
+    level: error
+
+  float-values:
+    forbid-inf: true
+    forbid-nan: true
+    forbid-scientific-notation: true
+    level: error
+    require-numeral-before-decimal: true
+
+  truthy:
+    level: error
+    allowed-values: ['true', 'false']
+    check-keys: false
+
+  # Formatting / consistency
+  indentation:
+    check-multi-line-strings: false
+    indent-sequences: consistent
+    level: error
+    spaces: 2
+
+  line-length:
+    allow-non-breakable-inline-mappings: true
+    allow-non-breakable-words: true
+    level: error
+    max: 120
+
+  comments:
+    ignore-shebangs: true
+    level: error
+    min-spaces-from-content: 1
+    require-starting-space: true
+
+  comments-indentation:
+    level: warning
+
+  braces:
+    forbid: false
+    level: error
+    max-spaces-inside-empty: 0
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    min-spaces-inside: 0
+
+  brackets:
+    forbid: false
+    level: error
+    max-spaces-inside-empty: 0
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    min-spaces-inside: 0
+
+  colons:
+    level: error
+    max-spaces-after: 1
+    max-spaces-before: 0
+
+  commas:
+    level: error
+    max-spaces-after: 1
+    max-spaces-before: 0
+    min-spaces-after: 1
+
+  hyphens:
+    level: error
+    max-spaces-after: 1
+
+  empty-lines:
+    level: error
+    max-end: 0
+    max-start: 0
+    max: 1
+
+  new-line-at-end-of-file:
+    level: error
+
+  new-lines:
+    level: error
+    type: unix
+
+  trailing-spaces:
+    level: error

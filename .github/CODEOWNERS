@@ -1,0 +1,17 @@
+#region ------ [ Header ] -------------------------------------------------------------------- #
+#  File: /.github/CODEOWNERS                                                                   #
+# --- [ Description ] ------------------------------------------------------------------------ #
+# CODEOWNERS maps gitignore-style path patterns to the people or teams responsible for         #
+# reviewing changes to those paths. GitHub uses this file to automatically request reviews     #
+# on pull requests that modify owned files; and, if "Require review from Code Owners" is       #
+# enabled via branch protection rules or rulesets, at least one listed owner must approve      #
+# before the pull request can be merged.                                                       #
+# --- [ Official GitHub references ] --------------------------------------------------------- #
+#  - Overview + syntax: https://docs.github.com/articles/about-code-owners                     #
+#  - Pull request reviews: https://docs.github.com/articles/about-pull-request-reviews         #
+#  - Branch protection: https://docs.github.com/en/repositories/configuring-branches-and-      #
+#    merges-in-your-repository/managing-protected-branches                                     #
+#endregion --- [ Header ] -------------------------------------------------------------------- #
+
+# Default owner for everything in the repo
+*                           @NWarila

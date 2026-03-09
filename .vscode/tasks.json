@@ -1,0 +1,84 @@
+{
+  // ======================================================================== //
+  //  VS Code Tasks — Quick-access Packer & Ansible operations               //
+  //                                                                          //
+  //  Run via: Terminal > Run Task... (Ctrl+Shift+P > Tasks: Run Task)        //
+  // ======================================================================== //
+  "version": "2.0.0",
+  "tasks": [
+    // ---- Packer Core ---------------------------------------------------- //
+    {
+      "label": "Packer: Format",
+      "type": "shell",
+      "command": "packer fmt -recursive -diff .",
+      "options": { "cwd": "${workspaceFolder}/packer" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Packer: Format Check",
+      "type": "shell",
+      "command": "packer fmt -check -recursive .",
+      "options": { "cwd": "${workspaceFolder}/packer" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Packer: Init",
+      "type": "shell",
+      "command": "packer init .",
+      "options": { "cwd": "${workspaceFolder}/packer" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Packer: Validate",
+      "type": "shell",
+      "command": "packer validate -var-file=\"../examples/rocky-linux-9.pkrvars.hcl\" -var-file=\"../examples/secrets.pkrvars.hcl\" .",
+      "options": { "cwd": "${workspaceFolder}/packer" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    // ---- Ansible -------------------------------------------------------- //
+    {
+      "label": "Ansible: Lint",
+      "type": "shell",
+      "command": "ansible-lint --config-file .config/.ansible-lint.yml packer/ansible/",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    // ---- Pre-Commit ----------------------------------------------------- //
+    {
+      "label": "Pre-Commit: Run All",
+      "type": "shell",
+      "command": "pre-commit run --all-files",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    // ---- Composite ------------------------------------------------------ //
+    {
+      "label": "Full Validation (fmt + init + validate + lint)",
+      "dependsOn": [
+        "Packer: Format Check",
+        "Packer: Init",
+        "Packer: Validate",
+        "Ansible: Lint"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}

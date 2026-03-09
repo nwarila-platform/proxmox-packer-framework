@@ -1,0 +1,90 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in the framework
+title: "bug: "
+labels: ["bug", "triage"]
+assignees:
+  - NWarila
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the sections below as completely as possible.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run `packer build ...`
+        2. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output
+      description: Paste the exact error output here.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: packer_version
+    attributes:
+      label: Packer version
+      placeholder: "e.g. 1.15.0"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: hashicorp/proxmox plugin version
+      placeholder: "e.g. 1.2.3"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "e.g. Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: input
+    id: proxmox_version
+    attributes:
+      label: Proxmox VE version
+      placeholder: "e.g. 8.4"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other relevant information (logs, screenshots, related issues).
+    validations:
+      required: false

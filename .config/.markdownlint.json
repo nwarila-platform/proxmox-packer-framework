@@ -1,0 +1,66 @@
+{
+  "default": true,
+
+  "MD003": { "style": "atx" },
+  "MD004": { "style": "dash" },
+
+  "MD009": {
+    "br_spaces": 2,
+    "code_blocks": false,
+    "list_item_empty_lines": false,
+    "strict": true
+  },
+
+  "MD010": {
+    "code_blocks": true,
+    "ignore_code_languages": ["makefile"],
+    "spaces_per_tab": 4
+  },
+
+  "MD013": {
+    "line_length": 120,
+    "heading_line_length": 100,
+    "code_blocks": false,
+    "tables": false,
+    "stern": true
+  },
+
+  "MD024": { "siblings_only": true },
+
+  "MD029": { "style": "one" },
+
+  "MD033": {
+    "allowed_elements": ["details", "summary", "kbd", "sub", "sup", "picture", "source", "img"],
+    "table_allowed_elements": ["br"]
+  },
+
+  "MD035": { "style": "---" },
+
+  "MD040": {
+    "allowed_languages": [],
+    "language_only": true
+  },
+
+  "MD041": {
+    "allow_preamble": true,
+    "front_matter_title": "^\\s*title\\s*[:=]",
+    "level": 1
+  },
+
+  "MD046": { "style": "fenced" },
+  "MD048": { "style": "backtick" },
+  "MD049": { "style": "asterisk" },
+  "MD050": { "style": "asterisk" },
+
+  "MD054": {
+    "autolink": true,
+    "inline": true,
+    "full": true,
+    "collapsed": true,
+    "shortcut": false,
+    "url_inline": false
+  },
+
+  "MD055": { "style": "leading_and_trailing" },
+  "MD060": { "style": "compact", "aligned_delimiter": true }
+}

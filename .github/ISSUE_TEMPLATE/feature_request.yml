@@ -1,0 +1,61 @@
+name: Feature Request
+description: Suggest an improvement or new capability for the framework
+title: "feat: "
+labels: ["enhancement", "triage"]
+assignees:
+  - NWarila
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. Please describe the problem you're trying to solve and your proposed solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this feature solve? What is currently missing or painful?
+      placeholder: "I'm frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the solution you'd like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative approaches or workarounds?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Which part of the framework does this affect?
+      options:
+        - Packer configuration (HCL)
+        - Ansible roles / playbooks
+        - CI/CD pipeline
+        - Pre-commit hooks
+        - Developer tooling
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other relevant information, links, or references.
+    validations:
+      required: false
