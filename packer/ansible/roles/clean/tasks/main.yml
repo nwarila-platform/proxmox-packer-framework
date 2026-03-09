@@ -83,6 +83,12 @@
         state: link
   when: ansible_distribution_major_version | int <= 8
 
+# Tasks to clean cloud-init.
+- name: "Cleaning cloud-init."
+  ansible.builtin.command:
+    cmd: cloud-init clean --logs --seed
+  changed_when: true
+
 # Tasks to clean the shell history.
 - name: "Cleaning the shell history."
   block:
