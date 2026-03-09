@@ -89,6 +89,26 @@
     cmd: cloud-init clean --logs --seed
   changed_when: true
 
+- name: "Ensuring cloud-init is not disabled."
+  ansible.builtin.file:
+    path: /etc/cloud/cloud-init.disabled
+    state: absent
+  
+# Tasks to clean the NetworkManager state.
+- name: "Removing stale NetworkManager connections."
+  ansible.builtin.find:
+    paths: /etc/NetworkManager/system-connections
+    patterns: '*.nmconnection'
+  register: nm_connections
+
+- name: "Removing stale NetworkManager connections."
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ nm_connections.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  
 # Tasks to clean the shell history.
 - name: "Cleaning the shell history."
   block:
