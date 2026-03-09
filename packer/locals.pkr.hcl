@@ -79,7 +79,7 @@ locals {
     node                 = var.packer_image.node
     pool                 = var.packer_image.pool
     tags                 = var.packer_image.tags
-    template_description = var.packer_image.template_description
+    template_description = "${var.packer_image.template_description} | Built: ${timestamp()}"
     template_name        = var.packer_image.template_name
     vm_id                = var.packer_image.vm_id
     vm_name              = var.packer_image.vm_name
