@@ -57,67 +57,24 @@ zerombr
 ### --initlabel Initializes a disk (or disks) by creating a default disk label for all disks in their respective architecture.
 clearpart --all --initlabel
 
-### Modify partition sizes for the virtual machine hardware.
-### Create primary system partitions.
-%{ for partition in storage_partitions ~}
-part
-%{~ if partition.volume_group != "" ~}
- pv.${partition.volume_group}
-%{~ else ~}
-%{~ if partition.format.fstype == "swap" ~}
- swap
-%{~ else ~}
- ${partition.mount.path}
-%{~ endif ~}
-%{~ if partition.format.fstype != "" ~}
- --label=${partition.format.label}
-%{~ if partition.format.fstype == "fat32" ~}
- --fstype vfat
-%{~ else ~}
- --fstype ${partition.format.fstype}
-%{~ endif ~}
-%{~ endif ~}
-%{~ endif ~}
-%{~ if partition.mount.options != "" ~}
-  --fsoptions="${partition.mount.options}"
-%{~ endif ~}
-%{~ if partition.size != -1 ~}
- --size=${partition.size}
-%{~ else ~}
- --size=100 --grow
-%{ endif ~}
+### Create primary system partitions (DISA STIG-aligned layout).
+part /boot/efi --label=EFIFS --fstype vfat --size=1024
+part /boot --label=BOOTFS --fstype ext4 --size=1024
+part pv.sysvg --size=100 --grow
 
-%{ endfor ~}
 ### Create a logical volume management (LVM) group.
-%{ for index, volume_group in storage_lvm ~}
-volgroup ${volume_group.name} pv.${volume_group.name}
+volgroup sysvg pv.sysvg
 
-### Modify logical volume sizes for the virtual machine hardware.
 ### Create logical volumes.
-%{ for partition in volume_group.partitions ~}
-logvol
-%{~ if partition.format.fstype == "swap" ~}
- swap
-%{~ else ~}
- ${partition.mount.path}
-%{~ endif ~}
- --name=${partition.name} --vgname=${volume_group.name} --label=${partition.format.label}
-%{~ if partition.format.fstype == "fat32" ~}
- --fstype vfat
-%{~ else ~}
- --fstype ${partition.format.fstype}
-%{~ endif ~}
-%{~ if partition.mount.options != "" ~}
- --fsoptions="${partition.mount.options}"
-%{~ endif ~}
-%{~ if partition.size != -1 ~}
- --size=${partition.size}
-%{~ else ~}
- --size=100 --grow
-%{ endif ~}
-
-%{ endfor ~}
-%{ endfor ~}
+logvol swap --name=lv_swap --vgname=sysvg --label=SWAPFS --fstype swap --size=1024
+logvol / --name=lv_root --vgname=sysvg --label=ROOTFS --fstype ext4 --size=10240
+logvol /home --name=lv_home --vgname=sysvg --label=HOMEFS --fstype ext4 --fsoptions="nodev,nosuid" --size=4096
+logvol /opt --name=lv_opt --vgname=sysvg --label=OPTFS --fstype ext4 --fsoptions="nodev" --size=2048
+logvol /tmp --name=lv_tmp --vgname=sysvg --label=TMPFS --fstype ext4 --fsoptions="nodev,noexec,nosuid" --size=4096
+logvol /var --name=lv_var --vgname=sysvg --label=VARFS --fstype ext4 --fsoptions="nodev" --size=2048
+logvol /var/tmp --name=lv_var_tmp --vgname=sysvg --label=VARTMPFS --fstype ext4 --fsoptions="nodev,noexec,nosuid" --size=1000
+logvol /var/log --name=lv_var_log --vgname=sysvg --label=VARLOGFS --fstype ext4 --fsoptions="nodev,noexec,nosuid" --size=4096
+logvol /var/log/audit --name=lv_var_audit --vgname=sysvg --label=AUDITFS --fstype ext4 --fsoptions="nodev,noexec,nosuid" --size=500
 
 ### Do not configure X on the installed system.
 skipx

@@ -174,12 +174,12 @@ variable "packer_image" {
 
   validation {
     condition     = var.packer_image.communicator == null || contains(["ssh", "winrm"], var.packer_image.communicator)
-    error_message = "packer_image.communicator must be \"ssh\" or \"winrm\"."
+    error_message = "The packer_image.communicator value must be \"ssh\" or \"winrm\"."
   }
 
   validation {
     condition     = var.packer_image.bios == null || contains(["ovmf", "seabios"], var.packer_image.bios)
-    error_message = "packer_image.bios must be \"ovmf\" or \"seabios\"."
+    error_message = "The packer_image.bios value must be \"ovmf\" or \"seabios\"."
   }
 
 }
@@ -330,50 +330,3 @@ variable "vga" {
 
 #endregion --- [ Packer Image ] -------------------------------------------------------------- #
 
-#region ------ [ VM Storage Layout ] --------------------------------------------------------- #
-
-variable "vm_disk_use_swap" {
-  type        = bool
-  description = "Whether to use a swap partition. Passed to consumer install templates via the template variable contract."
-  default     = false
-}
-
-variable "vm_disk_partitions" {
-  type = list(object({
-    name = string
-    size = number
-    format = object({
-      label  = string
-      fstype = string
-    })
-    mount = object({
-      path    = string
-      options = string
-    })
-    volume_group = string
-  }))
-  description = "The disk partitions for the virtual disk. Passed to consumer install templates via the template variable contract."
-  default     = []
-}
-
-variable "vm_disk_lvm" {
-  type = list(object({
-    name = string
-    partitions = list(object({
-      name = string
-      size = number
-      format = object({
-        label  = string
-        fstype = string
-      })
-      mount = object({
-        path    = string
-        options = string
-      })
-    }))
-  }))
-  description = "The LVM configuration for the virtual disk. Passed to consumer install templates via the template variable contract."
-  default     = []
-}
-
-#endregion --- [ VM Storage Layout ] --------------------------------------------------------- #

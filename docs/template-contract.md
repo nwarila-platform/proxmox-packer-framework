@@ -38,14 +38,6 @@ Changing this contract is a **breaking change** that must follow semantic versio
 | `network_ipv4_gateway` | string or null | Default gateway |
 | `network_dns` | list(string) or null | DNS servers |
 
-## Storage
-
-| Variable | Type | Source | Description |
-|---|---|---|---|
-| `storage_partitions` | list(object) | `var.vm_disk_partitions` | Partition definitions |
-| `storage_lvm` | list(object) | `var.vm_disk_lvm` | LVM volume groups |
-| `storage_use_swap` | bool | `var.vm_disk_use_swap` | Swap partition flag |
-
 ## Build Context
 
 | Variable | Type | Source | Description |

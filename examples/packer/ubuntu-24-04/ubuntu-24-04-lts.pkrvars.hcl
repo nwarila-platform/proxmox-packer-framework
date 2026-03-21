@@ -173,8 +173,3 @@ vga = {
   type   = "virtio"
   memory = null
 }
-
-# Autoinstall example keeps storage simple and lets Ubuntu use the full disk.
-vm_disk_use_swap   = true
-vm_disk_partitions = []
-vm_disk_lvm        = []

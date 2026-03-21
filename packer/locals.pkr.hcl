@@ -170,11 +170,6 @@ locals {
     network_ipv4_gateway = var.network_adapters[0].ipv4_gateway
     network_dns          = var.network_adapters[0].dns
 
-    # Storage
-    storage_partitions = var.vm_disk_partitions
-    storage_lvm        = var.vm_disk_lvm
-    storage_use_swap   = var.vm_disk_use_swap
-
     # Build Context
     build_bios         = local.packer_image.bios
     build_communicator = local.packer_image.communicator
