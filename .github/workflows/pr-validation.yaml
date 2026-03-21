@@ -3,32 +3,64 @@ name: PR Validation
 on:
   pull_request:
     branches: [main]
-    paths: ['packer/**', 'examples/**']
+    paths: ['packer/**', 'examples/**', 'terraform/**', '.github/scripts/**']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  packer_checks:
-    name: Packer Checks
+  validation:
+    name: Framework Checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 1
           persist-credentials: false
 
       - name: Perform Secrets Scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           GITLEAKS_CONFIG: "${{ github.workspace }}/.github/config/gitleaks.toml"
           GITLEAKS_ENABLE_SUMMARY: true
-          GITLEAKS_VERSION: 'latest'
+          GITLEAKS_VERSION: '8.30.0'
+
+      - name: Get Terraform version
+        shell: bash
+        run: |
+          terraform_version="$(sed -n 's/^[[:space:]]*required_version = "\([^"]*\)".*/\1/p' "${{ github.workspace }}/terraform/versions.tf")"
+          if [ -z "$terraform_version" ]; then
+            echo "::error::Unable to parse Terraform version from terraform/versions.tf"
+            exit 1
+          fi
+          echo "TERRAFORM_VERSION=$terraform_version" >> "$GITHUB_ENV"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+          terraform_wrapper: false
+
+      - name: Run terraform fmt (check)
+        working-directory: "${{ github.workspace }}/terraform/"
+        run: |
+          terraform fmt -check -recursive .
+          if [ $? -ne 0 ]; then
+            echo "::error::Terraform files need formatting. Run: terraform fmt -recursive ./terraform"
+            exit 1
+          fi
+
+      - name: Run terraform validate
+        run: |
+          if ! bash "${{ github.workspace }}/.github/scripts/validate_terraform.sh"; then
+            echo "::error::Terraform files are invalid"
+            exit 1
+          fi
 
       - name: Get Packer version
         working-directory: "${{ github.workspace }}/packer/"
@@ -36,7 +68,7 @@ jobs:
         run: "bash ${{ github.workspace }}/.github/scripts/get_packer_version.sh"
 
       - name: Setup Packer
-        uses: hashicorp/setup-packer@v3.1.0
+        uses: hashicorp/setup-packer@1aa358be5cf73883762b302a3a03abd66e75b232 # v3.1.0
         with:
           version: "${{ env.PACKER_VERSION }}"
 
@@ -56,10 +88,7 @@ jobs:
       - name: Run packer validate
         working-directory: "${{ github.workspace }}/packer/"
         run: |
-          if ! packer validate                                                     \
-            -var-file="${{ github.workspace }}/examples/rocky-linux-9.pkrvars.hcl" \
-            -var-file="${{ github.workspace }}/examples/secrets.pkrvars.hcl"       \
-            "${{ github.workspace }}/packer/"; then
+          if ! bash "${{ github.workspace }}/.github/scripts/validate_examples.sh"; then
             echo "::error::Packer files are invalid"
             exit 1
           fi

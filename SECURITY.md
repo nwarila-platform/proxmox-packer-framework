@@ -2,17 +2,21 @@
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| Latest release | Yes |
-| Previous minor | Security fixes only |
-| Older | No |
+This repository is currently in a pre-1.0 transition state while the framework boundary and
+consumer-owned Ansible model settle. Until multiple tagged release lines exist, the supported
+security surface is:
+
+- the current `main` branch
+- the latest tagged release, once release automation starts publishing real versions
+
+No previous-minor support matrix is published yet because the repository does not currently
+evidence multiple maintained release lines.
 
 ## Reporting a Vulnerability
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, report them via email to **reports@TrinityTechnicalServices.com** with the
+Instead, report them via email to **reports@nicholaswarila.com** with the
 following information:
 
 - Description of the vulnerability
@@ -49,10 +53,10 @@ disclosure. We will work with you to agree on a timeline.
 The following are **in scope** for security reports:
 
 - Packer templates that produce insecure VM configurations
-- Ansible roles that weaken OS hardening (SSH, SELinux, firewall)
+- Weaknesses in the framework's communicator hardening (SSH ciphers, WinRM transport)
 - Secrets or credentials exposed in build artifacts or logs
 - CI/CD pipeline vulnerabilities (workflow injection, secret leakage)
-- Kickstart configurations that bypass intended security controls
+- Installer template configurations that bypass intended security controls
 
 The following are **out of scope**:
 
@@ -60,14 +64,26 @@ The following are **out of scope**:
   to the respective maintainers
 - Issues requiring physical access to the Proxmox host
 - Denial of service against build infrastructure
+- Consumer-owned Ansible role or playbook security issues
 
 ## Security Features
 
 This project implements the following security controls:
 
-- **DISA STIG compliance** via OpenSCAP during OS installation
-- **CIS-aligned partitioning** with restrictive mount options
-- **SSH hardening** applied in both Kickstart and Ansible (defense in depth)
+- **Hardened SSH communicator** with restricted ciphers and key exchange algorithms
+- **UEFI/Secure Boot and TPM 2.0** support with secure defaults
 - **Secret scanning** via Gitleaks at every CI gate and pre-commit
 - **Dependency scanning** via Trivy (filesystem) and Dependabot (GitHub Actions)
-- **Template sealing** removes SSH keys, machine-id, logs, and cloud-init state
+- **SHA-pinned GitHub Actions** to prevent supply chain attacks via mutable tags
+
+### Security Notes for Shipped Examples
+
+- **TLS verification:** Shipped examples set `insecure_skip_tls_verify = true` as an
+  exception for environments with self-signed certificates. Production environments
+  should set this to `false`.
+- **WinRM transport:** The Windows example demonstrates a bootstrap-only HTTP Basic /
+  ignore-cert path on port 5985. The framework now exposes consumer-controlled WinRM
+  settings so hardened environments can use HTTPS on port 5986 with certificate
+  validation and stronger authentication.
+- **Installer hardening:** The Rocky Linux Kickstart example applies DISA STIG via
+  OpenSCAP, CIS-aligned partitioning, and SSH hardening in `%post`.

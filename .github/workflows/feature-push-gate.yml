@@ -10,30 +10,17 @@ permissions:
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
 
-      - name: Download GitHub Repo the GIT tool
-        uses: actions/checkout@v6
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          repository: "${{ github.repository }}"
-          ref: "${{ github.ref }}"
-          token: "${{ github.token }}"
-          persist-credentials: false
-          path: './'
-          clean: true
-          filter: null
-          sparse-checkout: null
-          sparse-checkout-cone-mode: true
           fetch-depth: 0
-          fetch-tags: false
-          show-progress: true
-          lfs: false
-          submodules: false
-          set-safe-directory: true
-          github-server-url: 'https://github.com'
+          persist-credentials: false
 
       - name: Perform Secrets Scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           GITLEAKS_NOTIFY_USER_LIST: "@NWarila"
@@ -41,4 +28,4 @@ jobs:
           GITLEAKS_CONFIG: "${{ github.workspace }}/.github/config/gitleaks.toml"
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
           GITLEAKS_ENABLE_SUMMARY: true
-          GITLEAKS_VERSION: 'latest'
+          GITLEAKS_VERSION: '8.30.0'

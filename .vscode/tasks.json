@@ -1,11 +1,39 @@
 {
   // ======================================================================== //
-  //  VS Code Tasks — Quick-access Packer & Ansible operations               //
+  //  VS Code Tasks — Quick-access Packer operations                         //
   //                                                                          //
   //  Run via: Terminal > Run Task... (Ctrl+Shift+P > Tasks: Run Task)        //
   // ======================================================================== //
   "version": "2.0.0",
   "tasks": [
+    // ---- Terraform Core ------------------------------------------------- //
+    {
+      "label": "Terraform: Format Check",
+      "type": "shell",
+      "command": "terraform fmt -check -recursive .",
+      "options": { "cwd": "${workspaceFolder}/terraform" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Init",
+      "type": "shell",
+      "command": "terraform init -backend=false",
+      "options": { "cwd": "${workspaceFolder}/terraform" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Validate",
+      "type": "shell",
+      "command": "& ../.github/scripts/validate_terraform.ps1",
+      "options": { "cwd": "${workspaceFolder}/terraform" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
     // ---- Packer Core ---------------------------------------------------- //
     {
       "label": "Packer: Format",
@@ -37,18 +65,8 @@
     {
       "label": "Packer: Validate",
       "type": "shell",
-      "command": "packer validate -var-file=\"../examples/rocky-linux-9.pkrvars.hcl\" -var-file=\"../examples/secrets.pkrvars.hcl\" .",
+      "command": "& ../.github/scripts/validate_examples.ps1",
       "options": { "cwd": "${workspaceFolder}/packer" },
-      "group": "test",
-      "presentation": { "reveal": "always", "panel": "shared" },
-      "problemMatcher": []
-    },
-    // ---- Ansible -------------------------------------------------------- //
-    {
-      "label": "Ansible: Lint",
-      "type": "shell",
-      "command": "ansible-lint --config-file .config/.ansible-lint.yml packer/ansible/",
-      "options": { "cwd": "${workspaceFolder}" },
       "group": "test",
       "presentation": { "reveal": "always", "panel": "shared" },
       "problemMatcher": []
@@ -65,12 +83,14 @@
     },
     // ---- Composite ------------------------------------------------------ //
     {
-      "label": "Full Validation (fmt + init + validate + lint)",
+      "label": "Full Validation (fmt + init + validate)",
       "dependsOn": [
+        "Terraform: Format Check",
+        "Terraform: Init",
+        "Terraform: Validate",
         "Packer: Format Check",
         "Packer: Init",
-        "Packer: Validate",
-        "Ansible: Lint"
+        "Packer: Validate"
       ],
       "dependsOrder": "sequence",
       "group": {

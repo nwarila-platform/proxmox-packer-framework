@@ -1,0 +1,63 @@
+# ============================================================================================= #
+# terraform.tfvars.example — Example variable values for ISO lifecycle management               #
+#                                                                                               #
+# Copy this file to terraform.tfvars and update the values for your environment.                #
+# Proxmox credentials are provided via environment variables (see .env.example).                #
+# ============================================================================================= #
+
+# --- ISO Files ----------------------------------------------------------------------------- #
+
+iso_files = [
+  {
+    name               = "rocky-linux-9"
+    node_name          = "tcnhq-prxmx01"
+    datastore_id       = "cephFS"
+    content_type       = "iso"
+    url                = "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.6-x86_64-dvd.iso"
+    checksum           = "8ff2a47e2f3bfe442617fceb7ef289b7b1d2d0502089dbbd505d5368b2b3a90f"
+    checksum_algorithm = "sha256"
+    file_name          = "Rocky-9.6-x86_64-dvd.iso"
+    overwrite          = false
+    upload_timeout     = 600
+    verify             = true
+  },
+  {
+    name               = "ubuntu-24-04-lts"
+    node_name          = "tcnhq-prxmx01"
+    datastore_id       = "cephFS"
+    content_type       = "iso"
+    url                = "https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso"
+    checksum           = "d6fea1f11b4d23b481a48f34985f150d7d20ee0a7246b30f2e3bbfe6541ea4f0"
+    checksum_algorithm = "sha256"
+    file_name          = "ubuntu-24.04.2-live-server-amd64.iso"
+    overwrite          = false
+    upload_timeout     = 600
+    verify             = true
+  },
+  {
+    name               = "windows-server-2022"
+    node_name          = "tcnhq-prxmx01"
+    datastore_id       = "cephFS"
+    content_type       = "iso"
+    url                = "https://software-static.download.prss.microsoft.com/sg/download/888969d5-f34g-4e03-ac9d-1f9786c66749/SERVER_EVAL_x64FRE_en-us.iso"
+    checksum           = "3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325"
+    checksum_algorithm = "sha256"
+    file_name          = "SERVER_EVAL_x64FRE_en-us.iso"
+    overwrite          = false
+    upload_timeout     = 600
+    verify             = true
+  },
+  {
+    name               = "virtio-win"
+    node_name          = "tcnhq-prxmx01"
+    datastore_id       = "cephFS"
+    content_type       = "iso"
+    url                = "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.262-2/virtio-win-0.1.262.iso"
+    checksum           = "ebd48258668f7f78e026ed276c28a9d19d83e020a36b24730bfba1a93eed3a35"
+    checksum_algorithm = "sha256"
+    file_name          = "virtio-win-0.1.262.iso"
+    overwrite          = false
+    upload_timeout     = 600
+    verify             = true
+  }
+]

@@ -1,84 +1,79 @@
 # Proxmox Packer Framework
 
-A production-grade, data-driven [Packer](https://www.packer.io/) framework for building hardened Proxmox VE virtual machine templates. It combines automated OS installation via Kickstart, configuration management through Ansible, and DISA STIG compliance via OpenSCAP — delivering golden images that are secure, reproducible, and ready for infrastructure-as-code consumption by Terraform or OpenTofu.
+A data-driven [Packer](https://www.packer.io/) framework for building hardened Proxmox VE VM templates. The framework owns the Proxmox builder contract, normalization layer, and CI validation flow. Consumer repositories bring their own installer templates, Ansible content, and environment-specific values.
 
----
+## Purpose
+
+This repository is an organizational framework, not a turnkey image factory. Its job is to give downstream repositories a stable, reusable Proxmox/Packer contract so teams inherit:
+
+- secure infrastructure defaults
+- a shared input schema
+- consistent validation and CI behavior
+- a clean separation between framework logic and consumer content
+
+The framework does not decide which packages, hardening profile, or application stack a guest OS should contain. Those decisions stay with the consumer repository.
+
+## Ownership Model
+
+| Layer | Owner | Default Source |
+|-------|-------|----------------|
+| Packer orchestration and variable contract | This framework | This repository |
+| ISO lifecycle on Proxmox storage | This framework's `terraform/` helper or a future external media repo | `examples/terraform/` |
+| OS installer templates | Consumer repo | Shipped installer examples in `examples/packer/` |
+| Ansible roles, playbooks, Galaxy requirements | Consumer repo | [ansible-framework](https://github.com/NWarila/ansible-framework) |
+
+This repository ships installer examples only. It does not ship Ansible roles, playbooks, inventories, or `ansible.cfg`; consumers import those from [ansible-framework](https://github.com/NWarila/ansible-framework) or an equivalent repository.
+
+Today, the committed `packer/iso/*.pkrvars.hcl` files remain the bootstrap media source of truth. For the shipped Rocky, Ubuntu, and Windows families, the framework can infer those bundled media defaults automatically from `packer_image.os_name` and `packer_image.os_version`. The `terraform/` helper can manage the same ISO lifecycle on Proxmox, but this repository does not yet auto-generate the Packer-side media contract from Terraform outputs. That handoff is intentionally deferred while a dedicated media-tracking repository is being prepared.
 
 ## Architecture
 
-```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│  .pkrvars.hcl (variables)                                               │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌──────────────────┐  │
-│  │  Proxmox   │  │  Hardware  │  │   Network   │  │  Disk / LVM      │  │
-│  │  API creds │  │  CPU, RAM  │  │  IP, VLAN   │  │  Partitions      │  │
-│  └─────┬──────┘  └─────┬──────┘  └──────┬──────┘  └────────┬─────────┘  │
-│        └───────────────┴────────────────┴──────────────────┘            │
-│                                    │                                    │
-│                          locals.pkr.hcl                                 │
-│                      (normalize + defaults)                             │
-│                                    │                                    │
-│                         source.pkr.hcl                                  │
-│                       (proxmox-iso source)                              │
-│                                    │                                    │
-└────────────────────────────────────┼────────────────────────────────────┘
-                                     │
-                    ┌────────────────┴────────────────┐
-                    │        builds.pkr.hcl            │
-                    │                                  │
-                    │  1. Kickstart (ks.pkrtpl.hcl)    │
-                    │     ├─ Partitioning (LVM)        │
-                    │     ├─ DISA STIG (OpenSCAP)      │
-                    │     ├─ SSH hardening              │
-                    │     └─ Deploy user creation       │
-                    │                                  │
-                    │  2. Ansible Provisioning          │
-                    │     ├─ base   (update + packages)│
-                    │     ├─ users  (fact injection)    │
-                    │     ├─ configure (cloud-init,    │
-                    │     │    SSH, hostname, SELinux)  │
-                    │     └─ clean  (logs, keys,       │
-                    │          machine-id, cloud-init)  │
-                    │                                  │
-                    │  3. Manifest (build metadata)     │
-                    └────────────────┬─────────────────┘
-                                     │
-                                     ▼
-                          Proxmox VM Template
-                       (ready for Terraform clone)
-```
+At a high level:
 
-## Features
+1. Consumer `.pkrvars.hcl` files provide environment-specific inputs.
+2. `packer/locals.pkr.hcl` normalizes those inputs and assembles the install-template contract.
+3. `packer/source.pkr.hcl` maps the normalized values into the Proxmox ISO builder.
+4. `packer/builds.pkr.hcl` runs the consumer-provided installer template, then the consumer-provided Ansible playbook.
 
-- **Data-driven configuration** — All VM parameters (CPU, memory, disks, network, partitions) are defined in `.pkrvars.hcl` files. The `locals.pkr.hcl` normalization layer applies sensible defaults via `coalesce()`, so consumers only override what they need.
-- **DISA STIG compliance** — The Kickstart template applies the STIG security profile during OS installation using the OpenSCAP add-on (`xccdf_org.ssgproject.content_profile_stig`).
-- **CIS-aligned disk partitioning** — Separate LVM volumes for `/`, `/home`, `/tmp`, `/var`, `/var/tmp`, `/var/log`, and `/var/log/audit` with restrictive mount options (`noexec`, `nosuid`, `nodev`).
-- **SSH hardening** — Root login disabled, public key authentication enforced, X11 forwarding disabled, SFTP subsystem explicitly configured, and `MaxAuthTries` / `LoginGraceTime` locked down — applied in both Kickstart `%post` and Ansible for defense in depth.
-- **Cloud-init lifecycle** — Installs cloud-init, configures the Proxmox datasource, enables all cloud-init services, loads the `isofs` kernel module for CDROM-based config drive detection, and performs a full clean (`cloud-init clean --logs --seed`) before template sealing.
-- **Template-ready cleanup** — The `clean` role removes SSH host keys, machine-id, audit/system logs, tmp directories, NetworkManager connections, udev rules, and shell history to ensure each clone gets a unique identity on first boot.
-- **Build metadata** — Every build produces a JSON manifest with git commit hash, build timestamp, hardware configuration, and the deploy username for full traceability.
-- **Automated build timestamps** — `template_description` is automatically stamped with the build time via Packer's `timestamp()` function, enabling downstream Terraform to detect template changes via `replace_triggered_by`.
+See [docs/architecture.md](docs/architecture.md) for design decisions and [docs/template-contract.md](docs/template-contract.md) for the template variable contract.
 
 ## Supported Operating Systems
 
-| OS | Version | Install Method | Example |
-|----|---------|---------------|---------|
-| Rocky Linux | 9.x | Kickstart | [rocky-linux-9.pkrvars.hcl](examples/rocky-linux-9.pkrvars.hcl) |
+| OS | Version | Install Method | Example | Status |
+|----|---------|----------------|---------|--------|
+| Rocky Linux | 9.x | Kickstart | [examples/packer/rocky-linux-9/](examples/packer/rocky-linux-9/) | Validated example |
+| Ubuntu Server | 24.04 LTS | Autoinstall | [examples/packer/ubuntu-24-04/](examples/packer/ubuntu-24-04/) | Validated bootstrap example |
+| Windows Server | 2022 | Autounattend | [examples/packer/windows-server-2022/](examples/packer/windows-server-2022/) | Validated bootstrap example |
 
-The framework's variable structure supports any RHEL-family OS (and has package maps for Debian, SUSE, and Ubuntu in `base/vars/main.yml`). Adding a new OS requires only a new `.pkrvars.hcl` file and, if needed, an install template.
+The generic `install_template` contract supports any guest OS that can boot from a rendered template file on a virtual CD.
+
+Bootstrap examples are validated in CI, but consumers are still expected to:
+
+- replace shipped media values if their environment uses different ISO locations or checksums
+- point `ansible_config.*` paths at consumer-owned Ansible content
+- decide whether example TLS and WinRM settings are acceptable bootstrap exceptions for their environment
+
+Supported bundled media defaults are inferred for:
+
+- `rocky` + `9`
+- `ubuntu` + `24.04`
+- `windows-server` + `2022`
+
+Consumers can still override those defaults explicitly with `media_profile`, `boot_iso`, or `additional_iso_files`.
 
 ## Prerequisites
 
 | Tool | Version | Purpose |
 |------|---------|---------|
+| [Terraform](https://developer.hashicorp.com/terraform) | 1.14.7 | Optional ISO lifecycle helper |
 | [Packer](https://www.packer.io/) | 1.15.0 | Image builder |
-| [Ansible](https://docs.ansible.com/) | 2.15+ | Configuration management |
+| [Ansible](https://docs.ansible.com/) | Consumer-defined | Consumer-owned provisioning content |
 | [Proxmox VE](https://www.proxmox.com/) | 8.x | Hypervisor target |
-| [pre-commit](https://pre-commit.com/) | 4.0+ | Local hook runner (optional) |
+| [pre-commit](https://pre-commit.com/) | 4.0+ | Local hook runner |
 
-### Proxmox API Token
+## Proxmox API Token
 
-Create a dedicated API token with the minimum permissions needed for Packer to create VMs and templates:
+Create a dedicated API token with the minimum permissions needed for Packer and, if used, the Terraform ISO helper. The example below uses `--privsep=0`, which disables token privilege separation. If your environment supports token-scoped ACLs, prefer a privilege-separated token with only the required permissions.
 
 ```bash
 pveum role add PackerBuilder -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit ISO.Download Pool.Audit Pool.Allocate SDN.Use Sys.Modify"
@@ -93,36 +88,72 @@ pveum user token add packer@pve packer-token --privsep=0
 
 ```bash
 git clone https://github.com/NWarila/proxmox-packer-framework.git
-cd proxmox-packer-framework/packer
+cd proxmox-packer-framework
+
+cd terraform
+terraform init
+
+cd ../packer
 packer init .
 ```
 
-### 2. Configure variables
-
-Copy the example files and fill in your environment-specific values:
+### 2. Copy example inputs
 
 ```bash
-cp examples/rocky-linux-9.pkrvars.hcl packer/my-rocky.pkrvars.hcl
-cp examples/secrets.pkrvars.hcl       packer/my-secrets.pkrvars.hcl
+# Packer example inputs
+cp ../examples/packer/.env.example ./../.env.packer.example
+cp ../examples/packer/rocky-linux-9/rocky-linux-9.pkrvars.hcl ./my-rocky.pkrvars.hcl
+
+# Optional Terraform ISO helper inputs
+cp ../examples/terraform/.env.example ../terraform/.env.terraform.example
+cp ../examples/terraform/terraform.tfvars.example ../terraform/terraform.tfvars
 ```
 
-Edit `my-secrets.pkrvars.hcl` with your Proxmox API credentials and deploy user settings. Edit `my-rocky.pkrvars.hcl` to match your network, storage, and hardware requirements.
+The `.env.example` files are templates for values you should export into your shell or CI environment. They are not auto-loaded by Terraform or Packer.
 
-### 3. Validate and build
+### 3. Configure your environment
+
+- export `PKR_VAR_*` values for Proxmox access and deploy-user credentials from the copied Packer env example
+- export `TF_VAR_*` values if you are using the Terraform ISO helper
+- edit `my-rocky.pkrvars.hcl` for network, storage, hardware, and installer settings
+- point `install_template.template_path` and `ansible_config.*` paths at consumer-owned content
+
+For the shipped Rocky, Ubuntu, and Windows families, you do not need a separate ISO var file just to validate or build. The framework will resolve the bundled media defaults automatically unless you override them.
+
+The framework also accepts `PKR_VAR_proxmox_skip_tls_verify` and `PKR_VAR_proxmox_node` as top-level CI-friendly overrides for the matching nested `packer_image` fields.
+
+If you want Terraform to manage ISO lifecycle today:
 
 ```bash
-# Validate configuration
+cd ../terraform
+terraform plan
+terraform apply
+```
+
+That helper uploads and tracks ISO media in Proxmox, but the checked-in bundled media catalog is still the active Packer-side default until the future external media repository is in place.
+
+### 4. Validate and build
+
+```bash
+# Terraform helper validation
+cd ../terraform
+terraform fmt -check -recursive .
+terraform validate
+
+# Packer validation and build
+cd ../packer
 packer validate \
   -var-file="my-rocky.pkrvars.hcl" \
-  -var-file="my-secrets.pkrvars.hcl" .
+  .
 
-# Build the template (-force replaces an existing template with the same vm_id)
 packer build -force \
   -var-file="my-rocky.pkrvars.hcl" \
-  -var-file="my-secrets.pkrvars.hcl" .
+  .
 ```
 
-### 4. Install pre-commit hooks (contributors)
+`vm_id` values are unique cluster-wide in Proxmox. The shipped example IDs are placeholders only.
+
+### 5. Install pre-commit hooks
 
 ```bash
 pre-commit install
@@ -133,78 +164,86 @@ pre-commit install --hook-type commit-msg
 
 ```text
 proxmox-packer-framework/
-├── .config/                        # Linter configurations
-│   ├── .ansible-lint.yml
-│   ├── .markdownlint.json
-│   └── .yamllint.yaml
-├── .github/
-│   ├── ISSUE_TEMPLATE/             # Structured bug/feature forms
-│   ├── config/gitleaks.toml        # Secret detection rules
-│   ├── scripts/get_packer_version.sh
-│   └── workflows/
-│       ├── dev-promotion-gate.yml  # Packer fmt + validate on DEV push
-│       ├── feature-push-gate.yml   # Gitleaks on feature branches
-│       ├── pr-validation.yaml      # Packer fmt + validate on PRs to main
-│       ├── release-please.yaml     # Automated changelog + GitHub Releases
-│       └── security.yaml           # Weekly Trivy + Gitleaks scan
-├── .vscode/                        # Editor settings + tasks
-├── examples/
-│   ├── rocky-linux-9.pkrvars.hcl   # Full Rocky Linux 9 example
-│   └── secrets.pkrvars.hcl         # Credential placeholder
-├── packer/
-│   ├── ansible/
-│   │   ├── ansible.cfg             # SSH, pipelining, transfer config
-│   │   ├── linux-playbook.yml      # Main playbook (base → users → configure → clean)
-│   │   ├── linux-requirements.yml  # Galaxy collections (ansible.posix, community.general)
-│   │   └── roles/
-│   │       ├── base/               # OS updates, package installation, cloud-init install
-│   │       ├── users/              # Fact injection for deploy user
-│   │       ├── configure/          # SSH, hostname, SELinux, cloud-init datasource
-│   │       └── clean/              # Template sealing (logs, keys, machine-id, cloud-init)
-│   ├── data/                       # Kickstart sub-templates (network, storage)
-│   ├── templates/
-│   │   └── ks.pkrtpl.hcl           # Data-driven Kickstart template
-│   ├── builds.pkr.hcl              # Build definition (Ansible provisioner + manifest)
-│   ├── data.pkr.hcl                # Git data source for build metadata
-│   ├── locals.pkr.hcl              # Variable normalization layer
-│   ├── providers.pkr.hcl           # Packer + plugin version pins
-│   ├── source.pkr.hcl              # proxmox-iso source definition
-│   └── variables.pkr.hcl           # Input variable declarations
-├── .editorconfig                   # Cross-editor formatting
-├── .gitattributes                  # Line endings, Linguist, export-ignore
-├── .pre-commit.config.yaml         # Hooks: hygiene, secrets, packer, ansible, yaml, markdown
-├── .release-please-manifest.json   # Current version tracker
-├── release-please-config.json      # Changelog sections + release config
-├── CHANGELOG.md
-├── CODE_OF_CONDUCT.md
-├── CONTRIBUTING.md
-├── LICENSE                         # MIT
-├── SECURITY.md
-└── SUPPORT.md
+|-- .config/
+|-- .github/
+|   |-- config/gitleaks.toml
+|   |-- scripts/
+|   |   |-- get_packer_version.sh
+|   |   |-- validate_examples.sh
+|   |   |-- validate_examples.ps1
+|   |   |-- validate_terraform.sh
+|   |   `-- validate_terraform.ps1
+|   `-- workflows/
+|-- .vscode/
+|-- docs/
+|   |-- architecture.md
+|   |-- template-contract.md
+|   `-- REQUIREMENTS.md
+|-- examples/
+|   |-- packer/
+|   |   |-- .env.example
+|   |   |-- rocky-linux-9/
+|   |   |-- ubuntu-24-04/
+|   |   `-- windows-server-2022/
+|   `-- terraform/
+|       |-- .env.example
+|       `-- terraform.tfvars.example
+|-- packer/
+|   |-- iso/
+|   |-- builds.pkr.hcl
+|   |-- data.pkr.hcl
+|   |-- locals.pkr.hcl
+|   |-- packer.pkr.hcl
+|   |-- source.pkr.hcl
+|   `-- variables.pkr.hcl
+|-- terraform/
+|   |-- .terraform.lock.hcl
+|   |-- data.tf
+|   |-- locals.tf
+|   |-- outputs.tf
+|   |-- providers.tf
+|   |-- resources.tf
+|   |-- variables.tf
+|   `-- versions.tf
+|-- .editorconfig
+|-- .gitattributes
+|-- .pre-commit.config.yaml
+|-- .release-please-manifest.json
+|-- release-please-config.json
+|-- CHANGELOG.md
+|-- CODE_OF_CONDUCT.md
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- SECURITY.md
+`-- SUPPORT.md
 ```
 
 ## CI/CD Pipeline
 
 | Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| **Feature Push Gate** | Push to any branch except DEV/TEST/PROD | Gitleaks secret scan |
-| **DEV Promotion Gate** | Push to `DEV` (packer/** changes) | Gitleaks + Packer fmt check + Packer validate |
-| **PR Validation** | PR to `main` (packer/** or examples/** changes) | Gitleaks + Packer fmt check + Packer validate |
-| **Security Scanning** | Push/PR to `main`, weekly schedule | Trivy filesystem scan (SARIF) + Gitleaks |
-| **Release Please** | Push to `main` | Automated changelog generation + GitHub Releases |
+|----------|---------|--------------|
+| Feature Push Gate | Push to any branch except `DEV`, `TEST`, `PROD` | Gitleaks secret scan |
+| DEV Promotion Gate | Push to `DEV` for `packer/**`, `terraform/**`, `examples/**`, `.github/scripts/**` | Gitleaks, Terraform fmt/validate, Packer fmt/validate |
+| PR Validation | PR to `main` for `packer/**`, `terraform/**`, `examples/**`, `.github/scripts/**` | Gitleaks, Terraform fmt/validate, Packer fmt/validate |
+| Security Scanning | Push/PR to `main`, weekly schedule | Trivy filesystem scan plus Gitleaks |
+| Release Please | Push to `main` | Automated changelog generation and GitHub releases |
 
 ## Downstream Integration
 
-This framework produces Proxmox VM templates designed to be consumed by Terraform or OpenTofu. The build timestamp in `template_description` enables automatic VM replacement when a new template is built:
+This framework produces Proxmox VM templates designed to be consumed by Terraform or OpenTofu. A downstream repo can check out its own consumer content next to this framework, place its `.auto.pkrvars.hcl` file in the framework `packer/` working directory, and run `packer validate .` / `packer build .` directly as long as it supplies:
+
+- `install_template` pointing at consumer-owned installer templates
+- `ansible_config` pointing at consumer-owned Ansible content, with `ansible-playbook` available on PATH in the runtime environment
+- `packer_image.os_name` and `packer_image.os_version` matching a bundled media family, or explicit media overrides
+
+The build timestamp in `template_description` can be used to trigger downstream VM replacement when a new template is published.
 
 ```hcl
-# In your Terraform configuration:
 resource "terraform_data" "template_version" {
   input = data.proxmox_virtual_environment_vm.template.description
 }
 
 resource "proxmox_virtual_environment_vm" "vm" {
-  # ...
   lifecycle {
     replace_triggered_by = [terraform_data.template_version]
   }
@@ -213,7 +252,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. This project uses [Conventional Commits](https://www.conventionalcommits.org/) and enforces them via pre-commit hooks.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. This project uses [Conventional Commits](https://www.conventionalcommits.org/) and enforces them with pre-commit hooks.
 
 ## License
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-FILE="./providers.pkr.hcl"
+FILE="./packer.pkr.hcl"
 [[ -f "$FILE" ]] || { echo "::error file=$FILE::Missing $FILE"; exit 1; }
 
 PACKER_VERSION="$(

@@ -1,32 +1,43 @@
 # ============================================================================================= #
-# - File: .\sources.pkr.hcl                                                   | Version: v1.0.0 #
-# --- [ Description ] ------------------------------------------------------------------------- #
-#                                                                                               #
+# source.pkr.hcl — Proxmox ISO source definition                                              #
 # ============================================================================================= #
 
 source "proxmox-iso" "packer_image" {
 
   # Proxmox Configuration
   proxmox_url = "https://${var.proxmox_hostname}:8006/api2/json"
-  username    = "${var.proxmox_api_token_id}"
-  token       = "${var.proxmox_api_token_secret}"
+  username    = var.proxmox_api_token_id
+  token       = var.proxmox_api_token_secret
 
-  # SSH Configuration
-  ssh_ciphers                 = ["aes128-gcm@openssh.com", "aes128-ctr", "aes192-ctr", "aes256-ctr"]
-  ssh_host                    = "${var.network_adapters[0].ipv4_address}"
-  ssh_key_exchange_algorithms = ["ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521"]
-  ssh_password                = "${var.deploy_user_password}"
-  ssh_port                    = "22"
-  ssh_timeout                 = "30m"
-  ssh_username                = "${var.deploy_user_name}"
+  # Communicator Configuration
+  communicator = local.packer_image.communicator
+
+  # SSH Configuration (used when communicator = "ssh")
+  ssh_ciphers                 = local.packer_image.communicator == "ssh" ? ["aes128-gcm@openssh.com", "aes128-ctr", "aes192-ctr", "aes256-ctr"] : null
+  ssh_host                    = local.packer_image.communicator == "ssh" ? var.network_adapters[0].ipv4_address : null
+  ssh_key_exchange_algorithms = local.packer_image.communicator == "ssh" ? ["ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521"] : null
+  ssh_password                = local.packer_image.communicator == "ssh" ? var.deploy_user_password : null
+  ssh_port                    = local.packer_image.communicator == "ssh" ? 22 : null
+  ssh_timeout                 = local.packer_image.communicator == "ssh" ? local.packer_image.ssh_timeout : null
+  ssh_username                = local.packer_image.communicator == "ssh" ? var.deploy_user_name : null
+
+  # WinRM Configuration (used when communicator = "winrm")
+  winrm_host     = local.packer_image.communicator == "winrm" ? var.network_adapters[0].ipv4_address : null
+  winrm_username = local.packer_image.communicator == "winrm" ? var.deploy_user_name : null
+  winrm_password = local.packer_image.communicator == "winrm" ? var.deploy_user_password : null
+  winrm_port     = local.packer_image.communicator == "winrm" ? local.packer_image.winrm_port : null
+  winrm_timeout  = local.packer_image.communicator == "winrm" ? local.packer_image.winrm_timeout : null
+  winrm_insecure = local.packer_image.communicator == "winrm" ? local.packer_image.winrm_insecure : null
+  winrm_use_ntlm = local.packer_image.communicator == "winrm" ? local.packer_image.winrm_use_ntlm : null
+  winrm_use_ssl  = local.packer_image.communicator == "winrm" ? local.packer_image.winrm_use_ssl : null
 
   # Proxmox Settings
   insecure_skip_tls_verify = local.packer_image.insecure_skip_tls_verify
 
   # General Settings
-  node = local.packer_image.node
-  pool = local.packer_image.pool
-  # tags                      = local.packer_image.tags
+  node                 = local.packer_image.node
+  pool                 = local.packer_image.pool
+  tags                 = join(";", local.packer_image.tags)
   template_description = local.packer_image.template_description
   template_name        = local.packer_image.template_name
   vm_id                = local.packer_image.vm_id
@@ -163,7 +174,7 @@ source "proxmox-iso" "packer_image" {
 
 
   dynamic "pci_devices" {
-    for_each = local.pci_devices == null ? null : local.pci_devices
+    for_each = coalesce(local.pci_devices, [])
     iterator = pci_device
 
     content {

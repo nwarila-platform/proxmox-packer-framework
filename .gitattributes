@@ -23,7 +23,6 @@
 
 # -------------------------------------------------------------------------- #
 #  Global default — normalize all text files to LF on commit                 #
-#  eol=lf enforced cross-platform (Linux CI + Windows self-hosted runners)   #
 # -------------------------------------------------------------------------- #
 * text=auto eol=lf
 

@@ -18,13 +18,37 @@
 
 # --- .config ---
 !.config/
-!.config/.ansible-lint.yml
 !.config/.markdownlint.json
 !.config/.yamllint.yaml
 
 # --- .github ---
 !.github/
-!.github/**
+!.github/.gitkeep
+!.github/CODEOWNERS
+!.github/FUNDING.yml
+!.github/dependabot.yml
+!.github/pull_request_template.md
+!.github/actions/
+!.github/actions/.gitkeep
+!.github/config/
+!.github/config/gitleaks.toml
+!.github/ISSUE_TEMPLATE/
+!.github/ISSUE_TEMPLATE/bug_report.yml
+!.github/ISSUE_TEMPLATE/feature_request.yml
+!.github/ISSUE_TEMPLATE/config.yml
+!.github/scripts/
+!.github/scripts/get_packer_version.sh
+!.github/scripts/validate_examples.sh
+!.github/scripts/validate_examples.ps1
+!.github/scripts/validate_terraform.sh
+!.github/scripts/validate_terraform.ps1
+!.github/workflows/
+!.github/workflows/.gitkeep
+!.github/workflows/dev-promotion-gate.yml
+!.github/workflows/feature-push-gate.yml
+!.github/workflows/pr-validation.yaml
+!.github/workflows/release-please.yaml
+!.github/workflows/security.yaml
 
 # --- .vscode ---
 !.vscode/
@@ -32,66 +56,58 @@
 !.vscode/settings.json
 !.vscode/tasks.json
 
+# --- docs ---
+!docs/
+!docs/architecture.md
+!docs/template-contract.md
+
 # --- examples ---
 !examples/
-!examples/.gitkeep
-!examples/rocky-linux-9.pkrvars.hcl
-!examples/secrets.pkrvars.hcl
+!examples/packer/
+!examples/packer/.env.example
+!examples/packer/rocky-linux-9/
+!examples/packer/rocky-linux-9/ks.pkrtpl.hcl
+!examples/packer/rocky-linux-9/rocky-linux-9.pkrvars.hcl
+!examples/packer/ubuntu-24-04/
+!examples/packer/ubuntu-24-04/ubuntu-24-04-lts.pkrvars.hcl
+!examples/packer/ubuntu-24-04/user-data.pkrtpl.hcl
+!examples/packer/windows-server-2022/
+!examples/packer/windows-server-2022/autounattend.pkrtpl.hcl
+!examples/packer/windows-server-2022/windows-server-2022.pkrvars.hcl
+!examples/terraform/
+!examples/terraform/.env.example
+!examples/terraform/terraform.tfvars.example
 
-# --- packer root ---
+# --- packer ---
 !packer/
 !packer/.gitkeep
 !packer/builds.pkr.hcl
 !packer/data.pkr.hcl
 !packer/locals.pkr.hcl
-!packer/providers.pkr.hcl
+!packer/packer.pkr.hcl
 !packer/source.pkr.hcl
 !packer/variables.pkr.hcl
 
-# --- packer/data ---
-!packer/data/
-!packer/data/ks.pkrtpl.hcl
-!packer/data/network.pkrtpl.hcl
-!packer/data/storage.pkrtpl.hcl
-
-# --- packer/templates ---
-!packer/templates/
-!packer/templates/.gitkeep
-!packer/templates/ks.pkrtpl.hcl
-
-# --- packer/ansible ---
-!packer/ansible/
-!packer/ansible/ansible.cfg
-!packer/ansible/linux-playbook.yml
-!packer/ansible/linux-requirements.yml
-
-# --- packer/ansible/roles ---
-!packer/ansible/roles/
-!packer/ansible/roles/base/
-!packer/ansible/roles/base/defaults/
-!packer/ansible/roles/base/defaults/main.yml
-!packer/ansible/roles/base/tasks/
-!packer/ansible/roles/base/tasks/main.yml
-!packer/ansible/roles/base/vars/
-!packer/ansible/roles/base/vars/main.yml
-!packer/ansible/roles/clean/
-!packer/ansible/roles/clean/tasks/
-!packer/ansible/roles/clean/tasks/main.yml
-!packer/ansible/roles/clean/vars/
-!packer/ansible/roles/clean/vars/main.yml
-!packer/ansible/roles/configure/
-!packer/ansible/roles/configure/tasks/
-!packer/ansible/roles/configure/tasks/main.yml
-!packer/ansible/roles/configure/vars/
-!packer/ansible/roles/configure/vars/main.yml
-!packer/ansible/roles/users/
-!packer/ansible/roles/users/tasks/
-!packer/ansible/roles/users/tasks/main.yml
-!packer/ansible/roles/users/vars/
-!packer/ansible/roles/users/vars/main.yml
+# --- packer/iso ---
+!packer/iso/
+!packer/iso/catalog.json
+!packer/iso/rocky-linux-9.pkrvars.hcl
+!packer/iso/ubuntu-24-04-lts.pkrvars.hcl
+!packer/iso/windows-server-2022.pkrvars.hcl
 
 # --- packer/artifacts, manifests (keep dir, not contents) ---
 !packer/artifacts/
 !packer/artifacts/.gitkeep
 !packer/manifests/
 !packer/manifests/.gitkeep
+
+# --- terraform ---
+!terraform/
+!terraform/data.tf
+!terraform/locals.tf
+!terraform/.terraform.lock.hcl
+!terraform/outputs.tf
+!terraform/providers.tf
+!terraform/resources.tf
+!terraform/variables.tf
+!terraform/versions.tf

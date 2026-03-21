@@ -1,0 +1,70 @@
+{
+  "rocky-linux-9": {
+    "boot_iso": {
+      "iso_checksum": "sha256:8ff2a47e2f3bfe442617fceb7ef289b7b1d2d0502089dbbd505d5368b2b3a90f",
+      "iso_file": "cephFS:iso/Rocky-9.6-x86_64-dvd.iso",
+      "iso_urls": null,
+      "iso_download_pve": null,
+      "iso_storage_pool": null,
+      "cd_label": null,
+      "index": 0,
+      "iso_target_extension": null,
+      "iso_target_path": null,
+      "keep_cdrom_device": false,
+      "type": "scsi",
+      "unmount": true
+    },
+    "additional_iso_files": []
+  },
+  "ubuntu-24-04-lts": {
+    "boot_iso": {
+      "iso_checksum": "sha256:d6fea1f11b4d23b481a48f34985f150d7d20ee0a7246b30f2e3bbfe6541ea4f0",
+      "iso_file": "cephFS:iso/ubuntu-24.04.2-live-server-amd64.iso",
+      "iso_urls": null,
+      "iso_download_pve": null,
+      "iso_storage_pool": null,
+      "cd_label": null,
+      "index": 0,
+      "iso_target_extension": null,
+      "iso_target_path": null,
+      "keep_cdrom_device": false,
+      "type": "scsi",
+      "unmount": true
+    },
+    "additional_iso_files": []
+  },
+  "windows-server-2022": {
+    "boot_iso": {
+      "iso_checksum": "sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325",
+      "iso_file": "cephFS:iso/SERVER_EVAL_x64FRE_en-us.iso",
+      "iso_urls": null,
+      "iso_download_pve": null,
+      "iso_storage_pool": null,
+      "cd_label": null,
+      "index": 0,
+      "iso_target_extension": null,
+      "iso_target_path": null,
+      "keep_cdrom_device": false,
+      "type": "sata",
+      "unmount": true
+    },
+    "additional_iso_files": [
+      {
+        "iso_checksum": "sha256:ebd48258668f7f78e026ed276c28a9d19d83e020a36b24730bfba1a93eed3a35",
+        "iso_file": "cephFS:iso/virtio-win-0.1.262.iso",
+        "iso_urls": null,
+        "iso_download_pve": null,
+        "iso_storage_pool": null,
+        "cd_content": null,
+        "cd_files": null,
+        "cd_label": null,
+        "index": 2,
+        "iso_target_extension": null,
+        "iso_target_path": null,
+        "keep_cdrom_device": false,
+        "type": "sata",
+        "unmount": true
+      }
+    ]
+  }
+}
