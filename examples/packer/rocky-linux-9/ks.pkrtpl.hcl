@@ -140,7 +140,7 @@ services --enabled=NetworkManager,sshd,qemu-guest-agent
 
 # Create the deploy user
 user --name=${deploy_user_name} --plaintext --password=${deploy_user_password} --groups=wheel
-sshkey --username=${deploy_user_name} "${deploy_user_key}"
+sshkey --username=${deploy_user_name} "${deploy_user_public_key}"
 
 ### Post-installation commands.
 %post

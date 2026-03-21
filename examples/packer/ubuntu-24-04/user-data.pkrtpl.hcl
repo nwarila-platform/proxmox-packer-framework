@@ -13,7 +13,7 @@ autoinstall:
     allow-pw: true
     install-server: true
     authorized-keys:
-      - ${deploy_user_key}
+      - ${deploy_user_public_key}
   storage:
     layout:
       name: direct

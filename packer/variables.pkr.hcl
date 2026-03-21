@@ -49,7 +49,7 @@ variable "deploy_user_password" {
   sensitive   = true
 }
 
-variable "deploy_user_key" {
+variable "deploy_user_public_key" {
   type        = string
   description = "The SSH public key to log in to the guest operating system."
   sensitive   = true

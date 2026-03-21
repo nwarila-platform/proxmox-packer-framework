@@ -52,7 +52,7 @@ proxmox_api_token_id     = "packer@pam!validation"
 proxmox_api_token_secret = "validation-secret"
 deploy_user_name         = "packer"
 deploy_user_password     = "ChangeMe123!"
-deploy_user_key          = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMockValidationKeyOnly build-validation@example"
+deploy_user_public_key          = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMockValidationKeyOnly build-validation@example"
 
 ansible_config = {
   playbook_path     = "${stub_playbook}"

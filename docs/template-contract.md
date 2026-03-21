@@ -10,7 +10,7 @@ Changing this contract is a **breaking change** that must follow semantic versio
 |---|---|---|---|
 | `deploy_user_name` | string | `var.deploy_user_name` | Deploy/service account username |
 | `deploy_user_password` | string | `var.deploy_user_password` | Deploy account password |
-| `deploy_user_key` | string | `var.deploy_user_key` | SSH public key |
+| `deploy_user_public_key` | string | `var.deploy_user_public_key` | SSH public key |
 
 ## Locale
 
