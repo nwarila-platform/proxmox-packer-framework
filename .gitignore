@@ -44,7 +44,7 @@
 !.github/scripts/validate_terraform.ps1
 !.github/workflows/
 !.github/workflows/.gitkeep
-!.github/workflows/dev-promotion-gate.yml
+!.github/workflows/main-validation.yml
 !.github/workflows/feature-push-gate.yml
 !.github/workflows/pr-validation.yaml
 !.github/workflows/release-please.yaml

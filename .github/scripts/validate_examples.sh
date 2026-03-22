@@ -50,6 +50,7 @@ create_override_file() {
 proxmox_hostname         = "proxmox.invalid"
 proxmox_api_token_id     = "packer@pam!validation"
 proxmox_api_token_secret = "validation-secret"
+proxmox_node             = "validation-node"
 deploy_user_name         = "packer"
 deploy_user_password     = "ChangeMe123!"
 deploy_user_public_key          = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMockValidationKeyOnly build-validation@example"
