@@ -222,9 +222,9 @@ proxmox-packer-framework/
 
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
-| Feature Push Gate | Push to any branch except `DEV`, `TEST`, `PROD` | Gitleaks secret scan |
-| DEV Promotion Gate | Push to `DEV` for `packer/**`, `terraform/**`, `examples/**`, `.github/scripts/**` | Gitleaks, Terraform fmt/validate, Packer fmt/validate |
-| PR Validation | PR to `main` for `packer/**`, `terraform/**`, `examples/**`, `.github/scripts/**` | Gitleaks, Terraform fmt/validate, Packer fmt/validate |
+| Feature Push Gate | Push to any non-`main` branch | Gitleaks secret scan |
+| Main Validation | Push to `main` for `packer/**`, `terraform/**`, `examples/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit.config.yaml` | Gitleaks, Terraform fmt/validate, Packer fmt/validate |
+| PR Validation | PR to `main` for `packer/**`, `terraform/**`, `examples/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit.config.yaml` | Gitleaks, Terraform fmt/validate, Packer fmt/validate |
 | Security Scanning | Push/PR to `main`, weekly schedule | Trivy filesystem scan plus Gitleaks |
 | Release Please | Push to `main` | Automated changelog generation and GitHub releases |
 
