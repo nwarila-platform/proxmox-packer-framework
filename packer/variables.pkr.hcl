@@ -105,14 +105,14 @@ variable "packer_image" {
 
     # Connection Settings
     communicator                 = string
-    ssh_timeout                  = string
-    winrm_timeout                = string
-    winrm_port                   = number
-    winrm_use_ssl                = bool
-    winrm_insecure               = bool
-    winrm_use_ntlm               = bool
-    winrm_transport              = string
-    winrm_server_cert_validation = string
+    ssh_timeout                  = optional(string)
+    winrm_timeout                = optional(string)
+    winrm_port                   = optional(number)
+    winrm_use_ssl                = optional(bool)
+    winrm_insecure               = optional(bool)
+    winrm_use_ntlm               = optional(bool)
+    winrm_transport              = optional(string)
+    winrm_server_cert_validation = optional(string)
 
     # Template Metadata
     os_language = string

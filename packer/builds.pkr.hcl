@@ -12,7 +12,7 @@ build {
   # inject a temporary stub so framework syntax checks can run without bundling
   # consumer Ansible content.
   provisioner "ansible" {
-    only                   = (local.packer_image.communicator == "ssh" && var.ansible_config.playbook_path != null) ? ["proxmox-iso.packer_image"] : []
+    except                 = (local.packer_image.communicator == "ssh" && var.ansible_config.playbook_path != null) ? [] : ["proxmox-iso.packer_image"]
     user                   = var.deploy_user_name
     galaxy_file            = var.ansible_config.requirements_path
     galaxy_force_with_deps = var.ansible_config.requirements_path != null ? true : null
@@ -37,7 +37,7 @@ build {
   # inject a temporary stub so framework syntax checks can run without bundling
   # consumer Ansible content.
   provisioner "ansible" {
-    only                   = (local.packer_image.communicator == "winrm" && var.ansible_config.playbook_path != null) ? ["proxmox-iso.packer_image"] : []
+    except                 = (local.packer_image.communicator == "winrm" && var.ansible_config.playbook_path != null) ? [] : ["proxmox-iso.packer_image"]
     user                   = var.deploy_user_name
     use_proxy              = false
     galaxy_file            = var.ansible_config.requirements_path
