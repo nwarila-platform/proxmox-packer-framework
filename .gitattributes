@@ -99,7 +99,6 @@ docs/           linguist-documentation=true
 .config/                    export-ignore
 .github/                    export-ignore
 .vscode/                    export-ignore
-.claude/                    export-ignore
 .gitattributes              export-ignore
 .gitignore                  export-ignore
 .editorconfig               export-ignore
