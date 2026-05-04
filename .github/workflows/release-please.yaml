@@ -22,10 +22,3 @@ jobs:
         with:
           release-type: simple
           target-branch: main
-          # One-shot pin: forces the next release PR to v0.0.1 rather than
-          # release-please's first-release default of v1.0.0. The v1.0.0
-          # contract lock is deferred until the consumer template repo and
-          # ansible-framework integrations are fully validated end-to-end.
-          # Remove this input in a follow-up after v0.0.1 is tagged so
-          # release-please resumes default semver bumps from that baseline.
-          release-as: 0.0.1
