@@ -15,8 +15,6 @@
   "pull-request-title-pattern": "chore: release ${version}",
   "include-v-in-tag": true,
   "packages": {
-    ".": {
-      "release-as": "0.0.1"
-    }
+    ".": {}
   }
 }
