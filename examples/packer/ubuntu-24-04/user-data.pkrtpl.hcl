@@ -8,12 +8,12 @@ autoinstall:
   identity:
     hostname: ubuntu-24-04-template
     username: ${deploy_user_name}
-    password: ${deploy_user_password}
+    password: ${deploy_user_password_hash}
   ssh:
-    allow-pw: true
+    allow-pw: false
     install-server: true
     authorized-keys:
-      - ${deploy_user_public_key}
+      - ${deploy_user_key}
   storage:
     layout:
       name: direct

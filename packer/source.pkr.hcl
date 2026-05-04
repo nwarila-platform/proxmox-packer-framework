@@ -13,10 +13,13 @@ source "proxmox-iso" "packer_image" {
   communicator = local.packer_image.communicator
 
   # SSH Configuration (used when communicator = "ssh")
+  # Linux/SSH builds authenticate exclusively via ssh-agent using the keypair generated at
+  # runtime by secure-packer-bootstrapper. There is no SSH password path; deploy_user_password
+  # is used only for Ansible become_pass.
+  ssh_agent_auth              = local.packer_image.communicator == "ssh" ? true : null
   ssh_ciphers                 = local.packer_image.communicator == "ssh" ? ["aes128-gcm@openssh.com", "aes128-ctr", "aes192-ctr", "aes256-ctr"] : null
   ssh_host                    = local.packer_image.communicator == "ssh" ? var.network_adapters[0].ipv4_address : null
   ssh_key_exchange_algorithms = local.packer_image.communicator == "ssh" ? ["ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521"] : null
-  ssh_password                = local.packer_image.communicator == "ssh" ? var.deploy_user_password : null
   ssh_port                    = local.packer_image.communicator == "ssh" ? 22 : null
   ssh_timeout                 = local.packer_image.communicator == "ssh" ? local.packer_image.ssh_timeout : null
   ssh_username                = local.packer_image.communicator == "ssh" ? var.deploy_user_name : null

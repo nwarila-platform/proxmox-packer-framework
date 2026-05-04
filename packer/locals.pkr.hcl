@@ -145,9 +145,12 @@ locals {
   template_vars = {
 
     # Credentials
-    deploy_user_name       = var.deploy_user_name
-    deploy_user_password   = var.deploy_user_password
-    deploy_user_public_key = var.deploy_user_public_key
+    # deploy_user_password_hash and deploy_user_key are required for Linux/SSH builds
+    # (provided by secure-packer-bootstrapper) and null for Windows/WinRM builds.
+    deploy_user_name          = var.deploy_user_name
+    deploy_user_password      = var.deploy_user_password
+    deploy_user_password_hash = var.deploy_user_password_hash
+    deploy_user_key           = var.deploy_user_key
 
     # Locale
     os_language = local.packer_image.os_language
