@@ -4,7 +4,7 @@
 
 This repository supports the Packer framework itself, the repository automation around it, and the developer workflow needed to work on it safely and consistently. This includes the variable contract, normalization layer, build pipeline, and shipped installer examples.
 
-Configuration management (Ansible playbooks, roles, Galaxy requirements) is owned by consumer repositories, not this framework. For Ansible-specific support, refer to [ansible-framework](https://github.com/NWarila/ansible-framework) or your consumer repo's documentation.
+Configuration management (Ansible playbooks, roles, Galaxy requirements) is owned by consumer repositories, not this framework. For Ansible-specific support, refer to [ansible-framework](https://github.com/nwarila-platform/ansible-framework) or your consumer repo's documentation.
 
 ## Out of scope
 
