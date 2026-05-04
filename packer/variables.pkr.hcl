@@ -39,19 +39,32 @@ variable "proxmox_node" {
 
 variable "deploy_user_name" {
   type        = string
-  description = "The username to log in to the guest operating system. (e.g. 'ubuntu')"
+  description = "The username for the deploy account in the guest operating system."
   sensitive   = true
 }
 
 variable "deploy_user_password" {
   type        = string
-  description = "The password to log in to the guest operating system."
+  description = "Plaintext deploy-user password. Used at build time only: as the WinRM password for Windows guests, and as the Ansible become_pass for Linux guests. Never baked into the resulting Linux image; the SHA-512 hash from deploy_user_password_hash is what lands in /etc/shadow. Provided by secure-packer-bootstrapper for Linux/SSH builds."
   sensitive   = true
 }
 
-variable "deploy_user_public_key" {
+variable "deploy_user_password_hash" {
   type        = string
-  description = "The SSH public key to log in to the guest operating system."
+  default     = null
+  description = "SHA-512 crypt hash of deploy_user_password. Required for Linux/SSH builds (consumed by the install template, e.g. Kickstart user --iscrypted); ignored for Windows/WinRM builds. Generated at runtime by secure-packer-bootstrapper. Must begin with '$6$'."
+  sensitive   = true
+
+  validation {
+    condition     = var.deploy_user_password_hash == null || can(regex("^\\$6\\$", var.deploy_user_password_hash))
+    error_message = "The deploy_user_password_hash value must be a SHA-512 crypt hash beginning with '$6$', or null when not used. Use secure-packer-bootstrapper to generate it."
+  }
+}
+
+variable "deploy_user_key" {
+  type        = string
+  default     = null
+  description = "SSH public key for the deploy user. Required for Linux/SSH builds (the matching private key is loaded into ssh-agent on the runner); ignored for Windows/WinRM builds. Generated at runtime by secure-packer-bootstrapper."
   sensitive   = true
 }
 

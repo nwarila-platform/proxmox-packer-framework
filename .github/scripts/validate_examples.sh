@@ -47,13 +47,14 @@ create_override_file() {
   local override_file="$1"
 
   cat > "$override_file" <<EOF
-proxmox_hostname         = "proxmox.invalid"
-proxmox_api_token_id     = "packer@pam!validation"
-proxmox_api_token_secret = "validation-secret"
-proxmox_node             = "validation-node"
-deploy_user_name         = "packer"
-deploy_user_password     = "ChangeMe123!"
-deploy_user_public_key          = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMockValidationKeyOnly build-validation@example"
+proxmox_hostname          = "proxmox.invalid"
+proxmox_api_token_id      = "packer@pam!validation"
+proxmox_api_token_secret  = "validation-secret"
+proxmox_node              = "validation-node"
+deploy_user_name          = "packer"
+deploy_user_password      = "ChangeMe123!"
+deploy_user_password_hash = "\$6\$rounds=10000\$validationsalt\$qY5tv1wGXcN0n4DZV1W6D8qA8g9lM2rjL9Y6G7sQ8dH5nD1vS2z2M4rB0Xj3tN1uQwF4L7gD1qK8mF0bN2nU1"
+deploy_user_key           = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMockValidationKeyOnly build-validation@example"
 
 ansible_config = {
   playbook_path     = "${stub_playbook}"

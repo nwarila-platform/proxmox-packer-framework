@@ -49,7 +49,7 @@ without framework changes.
 - Environment-specific values (IPs, storage pools, VM IDs, credentials)
 
 The default shared source for Ansible content is
-[ansible-framework](https://github.com/NWarila/ansible-framework).
+[ansible-framework](https://github.com/nwarila-platform/ansible-framework).
 
 ## ISO Lifecycle Boundary
 

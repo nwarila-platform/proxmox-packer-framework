@@ -95,9 +95,10 @@ services --enabled=NetworkManager,sshd,qemu-guest-agent
   profile = xccdf_org.ssgproject.content_profile_stig
 %end
 
-# Create the deploy user
-user --name=${deploy_user_name} --plaintext --password=${deploy_user_password} --groups=wheel
-sshkey --username=${deploy_user_name} "${deploy_user_public_key}"
+# Create the deploy user. The password hash is provided by secure-packer-bootstrapper at
+# build time; no plaintext credential ever lands in the resulting image.
+user --name=${deploy_user_name} --iscrypted --password=${deploy_user_password_hash} --groups=wheel
+sshkey --username=${deploy_user_name} "${deploy_user_key}"
 
 ### Post-installation commands.
 %post

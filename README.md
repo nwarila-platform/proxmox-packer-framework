@@ -20,9 +20,9 @@ The framework does not decide which packages, hardening profile, or application 
 | Packer orchestration and variable contract | This framework | This repository |
 | ISO lifecycle on Proxmox storage | This framework's `terraform/` helper or a future external media repo | `examples/terraform/` |
 | OS installer templates | Consumer repo | Shipped installer examples in `examples/packer/` |
-| Ansible roles, playbooks, Galaxy requirements | Consumer repo | [ansible-framework](https://github.com/NWarila/ansible-framework) |
+| Ansible roles, playbooks, Galaxy requirements | Consumer repo | [ansible-framework](https://github.com/nwarila-platform/ansible-framework) |
 
-This repository ships installer examples only. It does not ship Ansible roles, playbooks, inventories, or `ansible.cfg`; consumers import those from [ansible-framework](https://github.com/NWarila/ansible-framework) or an equivalent repository.
+This repository ships installer examples only. It does not ship Ansible roles, playbooks, inventories, or `ansible.cfg`; consumers import those from [ansible-framework](https://github.com/nwarila-platform/ansible-framework) or an equivalent repository.
 
 Today, the committed `packer/iso/*.pkrvars.hcl` files remain the bootstrap media source of truth. For the shipped Rocky, Ubuntu, and Windows families, the framework can infer those bundled media defaults automatically from `packer_image.os_name` and `packer_image.os_version`. The `terraform/` helper can manage the same ISO lifecycle on Proxmox, but this repository does not yet auto-generate the Packer-side media contract from Terraform outputs. That handoff is intentionally deferred while a dedicated media-tracking repository is being prepared.
 
@@ -87,7 +87,7 @@ pveum user token add packer@pve packer-token --privsep=0
 ### 1. Clone and initialize
 
 ```bash
-git clone https://github.com/NWarila/proxmox-packer-framework.git
+git clone https://github.com/nwarila-platform/proxmox-packer-framework.git
 cd proxmox-packer-framework
 
 cd terraform
