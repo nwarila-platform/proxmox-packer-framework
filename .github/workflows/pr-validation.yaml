@@ -1,10 +1,19 @@
+---
 name: PR Validation
 
 on:
   pull_request:
     branches: [main]
-    paths: ['packer/**', 'examples/**', 'terraform/**', '.github/scripts/**', '.github/workflows/**', '.pre-commit.config.yaml']
-  workflow_dispatch:
+    paths:
+      - 'packer/**'
+      - 'examples/**'
+      - 'contract/**'
+      - 'tools/**'
+      - 'docs/template-contract.md'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
+      - '.pre-commit.config.yaml'
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -22,16 +31,21 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Check reusable workflow contract
+        run: python tools/check_reusable_workflow_contract.py
+
       - name: Install Gitleaks CLI
         shell: bash
         env:
           GITLEAKS_VERSION: '8.30.0'
           GITLEAKS_SHA256: '79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e'
+          GITLEAKS_ASSET: >-
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.0/gitleaks_8.30.0_linux_x64.tar.gz
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --location \
             --retry 5 --retry-delay 2 --retry-connrefused --connect-timeout 15 \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            "${GITLEAKS_ASSET}" \
             -o /tmp/gitleaks.tar.gz
           printf '%s  %s\n' "${GITLEAKS_SHA256}" /tmp/gitleaks.tar.gz | sha256sum -c -
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
@@ -48,38 +62,6 @@ jobs:
             --redact \
             --verbose \
             --no-banner
-
-      - name: Get Terraform version
-        shell: bash
-        run: |
-          terraform_version="$(sed -n 's/^[[:space:]]*required_version = "\([^"]*\)".*/\1/p' "${{ github.workspace }}/terraform/versions.tf")"
-          if [ -z "$terraform_version" ]; then
-            echo "::error::Unable to parse Terraform version from terraform/versions.tf"
-            exit 1
-          fi
-          echo "TERRAFORM_VERSION=$terraform_version" >> "$GITHUB_ENV"
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
-        with:
-          terraform_version: "${{ env.TERRAFORM_VERSION }}"
-          terraform_wrapper: false
-
-      - name: Run terraform fmt (check)
-        working-directory: "${{ github.workspace }}/terraform/"
-        run: |
-          terraform fmt -check -recursive .
-          if [ $? -ne 0 ]; then
-            echo "::error::Terraform files need formatting. Run: terraform fmt -recursive ./terraform"
-            exit 1
-          fi
-
-      - name: Run terraform validate
-        run: |
-          if ! bash "${{ github.workspace }}/.github/scripts/validate_terraform.sh"; then
-            echo "::error::Terraform files are invalid"
-            exit 1
-          fi
 
       - name: Get Packer version
         working-directory: "${{ github.workspace }}/packer/"

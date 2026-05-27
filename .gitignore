@@ -40,14 +40,14 @@
 !.github/scripts/get_packer_version.sh
 !.github/scripts/validate_examples.sh
 !.github/scripts/validate_examples.ps1
-!.github/scripts/validate_terraform.sh
-!.github/scripts/validate_terraform.ps1
 !.github/workflows/
 !.github/workflows/.gitkeep
 !.github/workflows/main-validation.yml
 !.github/workflows/feature-push-gate.yml
 !.github/workflows/pr-validation.yaml
 !.github/workflows/release-please.yaml
+!.github/workflows/drift-gate.yaml
+!.github/workflows/reusable-packer-framework-build.yaml
 !.github/workflows/security.yaml
 
 # --- .vscode ---
@@ -60,6 +60,36 @@
 !docs/
 !docs/architecture.md
 !docs/template-contract.md
+!docs/decision-records/
+!docs/decision-records/org/
+!docs/decision-records/org/.gitkeep
+!docs/decision-records/org/0001-use-architecture-decision-records.md
+!docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
+!docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
+!docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
+!docs/decision-records/template/
+!docs/decision-records/template/.gitkeep
+!docs/decision-records/repo/
+!docs/decision-records/repo/.gitkeep
+!docs/tutorials/
+!docs/tutorials/.gitkeep
+!docs/how-to/
+!docs/how-to/.gitkeep
+!docs/reference/
+!docs/reference/.gitkeep
+!docs/explanation/
+!docs/explanation/.gitkeep
+
+# --- Contract and tools ---
+!contract/
+!contract/reusable-packer-framework-build.yaml
+!tools/
+!tools/check_reusable_workflow_contract.py
+!tools/ci/
+!tools/ci/apply_overlay.sh
+!tools/ci/packer_var_file_args.sh
+!tools/ci/validate_framework_ref.sh
+!tools/ci/validate_input_ref.sh
 
 # --- examples ---
 !examples/
@@ -76,6 +106,7 @@
 !examples/packer/windows-server-2022/windows-server-2022.pkrvars.hcl
 !examples/terraform/
 !examples/terraform/.env.example
+!examples/terraform/README.md
 !examples/terraform/terraform.tfvars.example
 
 # --- packer ---
@@ -100,14 +131,3 @@
 !packer/artifacts/.gitkeep
 !packer/manifests/
 !packer/manifests/.gitkeep
-
-# --- terraform ---
-!terraform/
-!terraform/data.tf
-!terraform/locals.tf
-!terraform/.terraform.lock.hcl
-!terraform/outputs.tf
-!terraform/providers.tf
-!terraform/resources.tf
-!terraform/variables.tf
-!terraform/versions.tf

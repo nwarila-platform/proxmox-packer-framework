@@ -1,0 +1,43 @@
+---
+version: 1
+workflow: .github/workflows/reusable-packer-framework-build.yaml
+inputs:
+  framework_ref:
+    type: string
+    required: true
+  input_repo:
+    type: string
+    required: false
+    default: ""
+  input_ref:
+    type: string
+    required: false
+    default: ""
+  allow_floating_input_ref:
+    type: boolean
+    required: false
+    default: false
+  overlay_paths:
+    type: string
+    required: false
+    default: ""
+  packer_version:
+    type: string
+    required: false
+    default: "1.15.0"
+  opa_version:
+    type: string
+    required: false
+    default: "1.10.0"
+  var_file:
+    type: string
+    required: false
+    default: ""
+  build:
+    type: boolean
+    required: false
+    default: false
+  upload_artifacts:
+    type: boolean
+    required: false
+    default: false

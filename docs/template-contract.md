@@ -10,7 +10,8 @@ Changing this contract is a **breaking change** that must follow semantic versio
 |---|---|---|---|
 | `deploy_user_name` | string | `var.deploy_user_name` | Deploy/service account username |
 | `deploy_user_password` | string | `var.deploy_user_password` | Deploy account password |
-| `deploy_user_public_key` | string | `var.deploy_user_public_key` | SSH public key |
+| `deploy_user_password_hash` | string or null | `var.deploy_user_password_hash` | SHA-512 crypt password hash for Linux installers |
+| `deploy_user_key` | string or null | `var.deploy_user_key` | SSH public key for Linux installers |
 
 ## Locale
 
@@ -59,7 +60,7 @@ Kickstart example:
 
 ```hcl
 network --activate --bootproto=static --ip=${network_ipv4_address} ...
-user --name=${deploy_user_name} --plaintext --password=${deploy_user_password}
+user --name=${deploy_user_name} --iscrypted --password=${deploy_user_password_hash}
 ```
 
 Autounattend example:
