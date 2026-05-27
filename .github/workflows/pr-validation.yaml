@@ -80,8 +80,7 @@ jobs:
       - name: Run packer fmt (check)
         working-directory: "${{ github.workspace }}/packer/"
         run: |
-          packer fmt -check -recursive .
-          if [ $? -ne 0 ]; then
+          if ! packer fmt -check -recursive .; then
             echo "::error::Packer files need formatting. Run: packer fmt -recursive ./packer"
             exit 1
           fi
