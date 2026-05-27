@@ -6,6 +6,26 @@
 # template with the same vm_id.                                                                 #
 # ============================================================================================= #
 
+# --- Boot ISO ---------------------------------------------------------------------------- #
+# In production, runner repos render this block from terraform-proxmox-iso-manager-framework
+# outputs into an auto-loaded pkrvars file (e.g. iso.auto.pkrvars.hcl). See
+# docs/architecture.md#iso-lifecycle-boundary. The static values below pin a known-good
+# Rocky 9.6 ISO so CI validate-only runs can resolve the source without Terraform.
+boot_iso = {
+  iso_checksum         = "sha256:8ff2a47e2f3bfe442617fceb7ef289b7b1d2d0502089dbbd505d5368b2b3a90f"
+  iso_file             = "cephFS:iso/Rocky-9.6-x86_64-dvd.iso"
+  iso_urls             = null
+  cd_label             = null
+  index                = 0
+  iso_download_pve     = false
+  iso_storage_pool     = null
+  iso_target_extension = null
+  iso_target_path      = null
+  keep_cdrom_device    = false
+  type                 = "scsi"
+  unmount              = true
+}
+
 # --- Install Template -------------------------------------------------------------------- #
 # Points to the Kickstart template shipped with this example. Consumer repos should provide
 # their own template path. The template receives the guaranteed template variable contract

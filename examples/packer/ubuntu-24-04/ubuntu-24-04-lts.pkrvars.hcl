@@ -6,6 +6,27 @@
 # template with the same vm_id.                                                                 #
 # ============================================================================================= #
 
+# --- Boot ISO -------------------------------------------------------------------------------- #
+# In production, runner repos render this block from terraform-proxmox-iso-manager-framework
+# outputs into an auto-loaded pkrvars file (e.g. iso.auto.pkrvars.hcl). See
+# docs/architecture.md#iso-lifecycle-boundary. The static values below pin a known-good
+# Ubuntu 24.04.2 live-server ISO so CI validate-only runs can resolve the source without
+# Terraform.
+boot_iso = {
+  iso_checksum         = "sha256:d6fea1f11b4d23b481a48f34985f150d7d20ee0a7246b30f2e3bbfe6541ea4f0"
+  iso_file             = "cephFS:iso/ubuntu-24.04.2-live-server-amd64.iso"
+  iso_urls             = null
+  cd_label             = null
+  index                = 0
+  iso_download_pve     = false
+  iso_storage_pool     = null
+  iso_target_extension = null
+  iso_target_path      = null
+  keep_cdrom_device    = false
+  type                 = "scsi"
+  unmount              = true
+}
+
 # --- Install Template ------------------------------------------------------------------------ #
 install_template = {
   template_path    = "../examples/packer/ubuntu-24-04/user-data.pkrtpl.hcl"

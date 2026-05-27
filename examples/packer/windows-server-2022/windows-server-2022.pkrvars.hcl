@@ -10,6 +10,50 @@
 # or stronger authentication where the environment supports it.                                 #
 # ============================================================================================= #
 
+# --- Boot ISO -------------------------------------------------------------------------------- #
+# In production, runner repos render this block from terraform-proxmox-iso-manager-framework
+# outputs into an auto-loaded pkrvars file (e.g. iso.auto.pkrvars.hcl). See
+# docs/architecture.md#iso-lifecycle-boundary. The static values below pin a known-good
+# Windows Server 2022 evaluation ISO so CI validate-only runs can resolve the source without
+# Terraform.
+boot_iso = {
+  iso_checksum         = "sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325"
+  iso_file             = "cephFS:iso/SERVER_EVAL_x64FRE_en-us.iso"
+  iso_urls             = null
+  cd_label             = null
+  index                = 0
+  iso_download_pve     = false
+  iso_storage_pool     = null
+  iso_target_extension = null
+  iso_target_path      = null
+  keep_cdrom_device    = false
+  type                 = "sata"
+  unmount              = true
+}
+
+# --- Additional ISO Files -------------------------------------------------------------------- #
+# Windows builds require the virtio-win drivers ISO on a second CD slot. In production this
+# block is rendered alongside boot_iso from a second module "iso" invocation pinning the
+# virtio-win release.
+additional_iso_files = [
+  {
+    iso_checksum         = "sha256:ebd48258668f7f78e026ed276c28a9d19d83e020a36b24730bfba1a93eed3a35"
+    iso_file             = "cephFS:iso/virtio-win-0.1.262.iso"
+    iso_urls             = null
+    cd_content           = null
+    cd_files             = null
+    cd_label             = null
+    index                = 2
+    iso_download_pve     = false
+    iso_storage_pool     = null
+    iso_target_extension = null
+    iso_target_path      = null
+    keep_cdrom_device    = false
+    type                 = "sata"
+    unmount              = true
+  }
+]
+
 # --- Install Template ------------------------------------------------------------------------ #
 install_template = {
   template_path    = "../examples/packer/windows-server-2022/autounattend.pkrtpl.hcl"
