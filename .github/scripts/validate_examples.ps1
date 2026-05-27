@@ -93,6 +93,45 @@ ansible_config = {
         )
     }
 
+    function Assert-BootIsoRequired {
+        param(
+            [Parameter(Mandatory = $true)]
+            [string] $ExampleFile
+        )
+
+        $overrideFile = Join-Path $tmpDir "boot-iso-required.pkrvars.hcl"
+        $nullBootIsoFile = Join-Path $tmpDir "boot-iso-null.pkrvars.hcl"
+        $expectedMessage = "The boot_iso value must be supplied explicitly by the caller."
+        New-OverrideFile -OverridePath $overrideFile
+
+        @"
+boot_iso = null
+"@ | Set-Content -Path $nullBootIsoFile -NoNewline
+
+        Write-Host "Validating boot_iso required guard..."
+        $output = & "packer" @(
+            "validate",
+            "-var-file=$ExampleFile",
+            "-var-file=$overrideFile",
+            "-var-file=$nullBootIsoFile",
+            "."
+        ) 2>&1
+        $exitCode = $LASTEXITCODE
+        $outputText = $output | Out-String
+
+        if ($exitCode -eq 0) {
+            throw "packer validate succeeded with boot_iso = null"
+        }
+        if ($outputText -notlike "*$expectedMessage*") {
+            Write-Error $outputText
+            throw "missing expected boot_iso validation message"
+        }
+
+        # The packer call above is intentionally non-zero. Clear $LASTEXITCODE so the
+        # script's overall exit code reflects assertion success rather than that failure.
+        $global:LASTEXITCODE = 0
+    }
+
     Push-Location $packerDir
     Invoke-NativeCommand -Executable "packer" -Arguments @("init", ".")
     Invoke-ExampleValidation `
@@ -104,6 +143,8 @@ ansible_config = {
     Invoke-ExampleValidation `
         -ExampleName "windows-server-2022" `
         -ExampleFile (Join-Path $repoRoot "examples\packer\windows-server-2022\windows-server-2022.pkrvars.hcl")
+    Assert-BootIsoRequired `
+        -ExampleFile (Join-Path $repoRoot "examples\packer\rocky-linux-9\rocky-linux-9.pkrvars.hcl")
 }
 finally {
     Pop-Location -ErrorAction SilentlyContinue

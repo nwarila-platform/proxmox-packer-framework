@@ -231,6 +231,11 @@ variable "boot_iso" {
     type                 = string
     unmount              = bool
   })
+
+  validation {
+    condition     = var.boot_iso != null
+    error_message = "The boot_iso value must be supplied explicitly by the caller. Render it from terraform-proxmox-iso-manager-framework outputs into a pkrvars file and pass that file through the reusable workflow var_file input."
+  }
 }
 
 variable "disks" {
