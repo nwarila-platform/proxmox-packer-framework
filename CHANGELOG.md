@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/nwarila-platform/proxmox-packer-framework/compare/v0.0.1...v0.1.0) (2026-05-27)
+
+
+### Features
+
+* **ci:** expose reusable Packer framework workflow ([11adc3c](https://github.com/nwarila-platform/proxmox-packer-framework/commit/11adc3c940b62c56f9dba56039b2fa27c23e270b))
+
 ## 0.0.1 (2026-05-04)
 
 
