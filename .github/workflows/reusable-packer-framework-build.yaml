@@ -1,0 +1,415 @@
+---
+name: Reusable Proxmox Packer Framework Build
+
+# Framework-owned reusable workflow for Proxmox/Packer consumers. It preserves
+# the upstream packer-framework-template input contract while replacing the
+# credential-free file builder behavior with this repo's Proxmox build path.
+
+on:
+  workflow_call:
+    inputs:
+      framework_ref:
+        description: 40-character commit SHA of this framework to check out.
+        required: true
+        type: string
+      input_repo:
+        description: owner/repo that supplies framework input files.
+        required: false
+        type: string
+        default: ""
+      input_ref:
+        description: Git ref of the input repository to check out.
+        required: false
+        type: string
+        default: ""
+      allow_floating_input_ref:
+        description: Emergency escape hatch for callers that need a floating input_ref.
+        required: false
+        type: boolean
+        default: false
+      overlay_paths:
+        description: Newline-separated input-to-framework overlay entries.
+        required: false
+        type: string
+        default: ""
+      packer_version:
+        description: Exact Packer CLI version to install.
+        required: false
+        type: string
+        default: "1.15.0"
+      opa_version:
+        description: Accepted for upstream contract compatibility.
+        required: false
+        type: string
+        default: "1.10.0"
+      var_file:
+        description: Newline-separated paths within the input checkout to Packer var files.
+        required: false
+        type: string
+        default: ""
+      build:
+        description: Run packer build after validate.
+        required: false
+        type: boolean
+        default: false
+      upload_artifacts:
+        description: Upload generated packer artifacts and manifests.
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      proxmox_hostname:
+        description: Proxmox host name or address for build=true.
+        required: false
+      proxmox_api_token_id:
+        description: Proxmox API token ID for build=true.
+        required: false
+      proxmox_api_token_secret:
+        description: Proxmox API token secret for build=true.
+        required: false
+      proxmox_node:
+        description: Proxmox node for build=true.
+        required: false
+      proxmox_skip_tls_verify:
+        description: Optional Proxmox TLS verification override for build=true.
+        required: false
+      deploy_user_name:
+        description: Optional deploy username for build=true. Defaults to builder.
+        required: false
+    outputs:
+      build_status:
+        description: '"validated" or "built"'
+        value: ${{ jobs.framework_build.outputs.build_status }}
+
+permissions:
+  contents: read
+
+jobs:
+  framework_build:
+    name: proxmox-packer-framework / build
+    runs-on: ${{ inputs.build && fromJSON('["self-hosted","Linux","X64"]') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ inputs.build && 120 || 20 }}
+    outputs:
+      build_status: ${{ steps.status.outputs.build_status }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Resolve input-ref / input-repo defaults
+        id: refs
+        env:
+          OVERRIDE_REPO: ${{ inputs.input_repo }}
+          OVERRIDE_REF: ${{ inputs.input_ref }}
+          FALLBACK_REPO: ${{ github.repository }}
+          FALLBACK_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          repo="${OVERRIDE_REPO:-$FALLBACK_REPO}"
+          ref="${OVERRIDE_REF:-$FALLBACK_REF}"
+          echo "input_repo=${repo}" >> "${GITHUB_OUTPUT}"
+          echo "input_ref=${ref}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate refs before checkout
+        env:
+          FRAMEWORK_REF: ${{ inputs.framework_ref }}
+          INPUT_REF: ${{ steps.refs.outputs.input_ref }}
+          ALLOW_FLOATING_INPUT_REF: ${{ inputs.allow_floating_input_ref }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${FRAMEWORK_REF}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::framework_ref must be a 40-character SHA, got '${FRAMEWORK_REF}'" >&2
+            exit 1
+          fi
+          case "${ALLOW_FLOATING_INPUT_REF}" in
+            true|false) ;;
+            *)
+              echo "::error::allow_floating_input_ref must be true or false, got '${ALLOW_FLOATING_INPUT_REF}'" >&2
+              exit 1
+              ;;
+          esac
+          if [[ "${ALLOW_FLOATING_INPUT_REF}" != "true" && ! "${INPUT_REF}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::input_ref must be a 40-character SHA, got '${INPUT_REF}'" >&2
+            exit 1
+          fi
+          if [[ "${ALLOW_FLOATING_INPUT_REF}" == "true" ]]; then
+            echo "::warning::allow_floating_input_ref=true; input checkout is not SHA-pinned."
+          fi
+
+      - name: Check out framework at framework_ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: nwarila-platform/proxmox-packer-framework
+          ref: ${{ inputs.framework_ref }}
+          path: framework
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify ref helper scripts
+        env:
+          FRAMEWORK_REF: ${{ inputs.framework_ref }}
+          INPUT_REF: ${{ steps.refs.outputs.input_ref }}
+          ALLOW_FLOATING_INPUT_REF: ${{ inputs.allow_floating_input_ref }}
+        run: |
+          set -euo pipefail
+          bash framework/tools/ci/validate_framework_ref.sh "${FRAMEWORK_REF}"
+          bash framework/tools/ci/validate_input_ref.sh "${INPUT_REF}" "${ALLOW_FLOATING_INPUT_REF}"
+
+      - name: Check out input repo at input_ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: ${{ steps.refs.outputs.input_repo }}
+          ref: ${{ steps.refs.outputs.input_ref }}
+          path: input
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Apply overlay
+        if: ${{ inputs.overlay_paths != '' }}
+        env:
+          OVERLAY_PATHS: ${{ inputs.overlay_paths }}
+        run: |
+          set -euo pipefail
+          bash framework/tools/ci/apply_overlay.sh input framework "${OVERLAY_PATHS}"
+
+      - name: Set up Packer
+        uses: hashicorp/setup-packer@1aa358be5cf73883762b302a3a03abd66e75b232 # v3.1.0
+        with:
+          version: ${{ inputs.packer_version }}
+
+      - name: Resolve var-file argument
+        id: varfile
+        env:
+          VAR_FILE: ${{ inputs.var_file }}
+        run: |
+          set -euo pipefail
+          {
+            echo "args<<PACKER_VAR_ARGS"
+            bash framework/tools/ci/packer_var_file_args.sh "${VAR_FILE}"
+            echo "PACKER_VAR_ARGS"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Packer init
+        working-directory: framework/packer
+        run: packer init .
+
+      - name: Install validate-only Ansible stub
+        if: ${{ ! inputs.build }}
+        run: |
+          set -euo pipefail
+          stub_dir="${RUNNER_TEMP}/ansible-stub"
+          rm -rf "${stub_dir}"
+          mkdir -p "${stub_dir}"
+          cat > "${stub_dir}/ansible-playbook" <<'SH'
+          #!/usr/bin/env sh
+          if [ "${1:-}" = "--version" ]; then
+            echo "ansible-playbook [core 2.18.0]"
+            exit 0
+          fi
+          exit 0
+          SH
+          chmod 700 "${stub_dir}/ansible-playbook"
+          echo "${stub_dir}" >> "${GITHUB_PATH}"
+
+      - name: Packer validate
+        if: ${{ ! inputs.build }}
+        working-directory: framework/packer
+        env:
+          VAR_FILE_ARGS: ${{ steps.varfile.outputs.args }}
+          PKR_VAR_proxmox_hostname: proxmox.invalid
+          PKR_VAR_proxmox_api_token_id: packer@pam!validation
+          PKR_VAR_proxmox_api_token_secret: validation-secret
+          PKR_VAR_proxmox_node: validation-node
+          PKR_VAR_deploy_user_name: packer
+          PKR_VAR_deploy_user_password: ChangeMe123!
+          PKR_VAR_deploy_user_password_hash: >-
+            $6$rounds=10000$validationsalt$qY5tv1wGXcN0n4DZV1W6D8qA8g9lM2rjL9Y6G7sQ8dH5nD1vS2z2M4rB0Xj3tN1uQwF4L7gD1qK8mF0bN2nU1
+          PKR_VAR_deploy_user_key: >-
+            ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMockValidationKeyOnly build-validation@example
+        run: |
+          set -euo pipefail
+          args=(validate)
+          if [ -n "${VAR_FILE_ARGS}" ]; then
+            while IFS= read -r arg; do
+              args+=("${arg}")
+            done <<< "${VAR_FILE_ARGS}"
+          fi
+          args+=(.)
+          packer "${args[@]}"
+
+      - name: Download and verify secure-packer-bootstrapper
+        if: ${{ inputs.build }}
+        env:
+          BOOTSTRAPPER_REPO: nwarila-platform/secure-packer-bootstrapper
+          BOOTSTRAPPER_TAG: v1.0.0
+          BOOTSTRAPPER_COMMIT: d23df5d61f23b2839a4e10c17324c5530fea2522
+          BOOTSTRAPPER_SHA256: 01003d60850fb7a1d9c6ec110b5d3f0a5a35f896f09e5fdf26206caace939432
+        run: |
+          set -euo pipefail
+          umask 077
+          bootstrap_dir="${RUNNER_TEMP}/secure-packer-bootstrapper"
+          asset_base_url="https://github.com/${BOOTSTRAPPER_REPO}/releases/download/${BOOTSTRAPPER_TAG}"
+
+          rm -rf "${bootstrap_dir}"
+          mkdir -p "${bootstrap_dir}"
+          curl --fail --silent --show-error --location \
+            --retry 5 --retry-delay 2 --retry-connrefused --connect-timeout 15 \
+            "${asset_base_url}/secure-packer-bootstrapper.sh" \
+            -o "${bootstrap_dir}/secure-packer-bootstrapper.sh"
+          curl --fail --silent --show-error --location \
+            --retry 5 --retry-delay 2 --retry-connrefused --connect-timeout 15 \
+            "${asset_base_url}/secure-packer-bootstrapper.sh.sha256" \
+            -o "${bootstrap_dir}/secure-packer-bootstrapper.sh.sha256"
+          curl --fail --silent --show-error --location \
+            --retry 5 --retry-delay 2 --retry-connrefused --connect-timeout 15 \
+            "${asset_base_url}/secure-packer-bootstrapper.release.json" \
+            -o "${bootstrap_dir}/secure-packer-bootstrapper.release.json"
+
+          downloaded_sha256="$(awk '{print tolower($1)}' "${bootstrap_dir}/secure-packer-bootstrapper.sh.sha256")"
+          if [[ "${downloaded_sha256}" != "${BOOTSTRAPPER_SHA256}" ]]; then
+            echo "::error::Downloaded bootstrapper checksum does not match the pinned SHA256." >&2
+            exit 1
+          fi
+          printf '%s  %s\n' \
+            "${BOOTSTRAPPER_SHA256}" \
+            "${bootstrap_dir}/secure-packer-bootstrapper.sh" | sha256sum -c -
+
+          python3 - "${bootstrap_dir}/secure-packer-bootstrapper.release.json" <<'PY'
+          import json
+          import os
+          import pathlib
+          import sys
+
+          metadata = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          expected = {
+              "tag": os.environ["BOOTSTRAPPER_TAG"],
+              "commit": os.environ["BOOTSTRAPPER_COMMIT"],
+              "bundle_sha256": os.environ["BOOTSTRAPPER_SHA256"],
+          }
+          for key, value in expected.items():
+              if metadata.get(key) != value:
+                  raise SystemExit(f"bootstrapper metadata {key} did not match the pinned value")
+          PY
+          chmod 700 "${bootstrap_dir}/secure-packer-bootstrapper.sh"
+          echo "SECURE_PACKER_BOOTSTRAPPER_BUNDLE=${bootstrap_dir}/secure-packer-bootstrapper.sh" >> "${GITHUB_ENV}"
+          echo "SECURE_PACKER_BOOTSTRAPPER_DIR=${bootstrap_dir}" >> "${GITHUB_ENV}"
+
+      - name: Packer validate and build
+        if: ${{ inputs.build }}
+        working-directory: framework/packer
+        env:
+          VAR_FILE_ARGS: ${{ steps.varfile.outputs.args }}
+          PKR_VAR_proxmox_hostname: ${{ secrets.proxmox_hostname }}
+          PKR_VAR_proxmox_api_token_id: ${{ secrets.proxmox_api_token_id }}
+          PKR_VAR_proxmox_api_token_secret: ${{ secrets.proxmox_api_token_secret }}
+          PKR_VAR_proxmox_node: ${{ secrets.proxmox_node }}
+          PKR_VAR_proxmox_skip_tls_verify: ${{ secrets.proxmox_skip_tls_verify || 'false' }}
+          PKR_VAR_deploy_user_name: ${{ secrets.deploy_user_name || 'builder' }}
+        run: |
+          set -euo pipefail
+          umask 077
+
+          required_variables=(
+            PKR_VAR_proxmox_hostname
+            PKR_VAR_proxmox_api_token_id
+            PKR_VAR_proxmox_api_token_secret
+            PKR_VAR_proxmox_node
+            PKR_VAR_deploy_user_name
+          )
+          for variable_name in "${required_variables[@]}"; do
+            variable_value="${!variable_name:-}"
+            if [[ -z "${variable_value//[[:space:]]/}" ]]; then
+              echo "::error::Required build variable is not set: ${variable_name}" >&2
+              exit 1
+            fi
+          done
+
+          required_commands=(ansible-playbook curl python3 setsid sha256sum ssh-add ssh-agent)
+          for command_name in "${required_commands[@]}"; do
+            if ! command -v "${command_name}" >/dev/null 2>&1; then
+              echo "::error::Required executable not found: ${command_name}" >&2
+              exit 1
+            fi
+          done
+
+          args=(validate)
+          build_args=(build -force)
+          if [ -n "${VAR_FILE_ARGS}" ]; then
+            while IFS= read -r arg; do
+              args+=("${arg}")
+              build_args+=("${arg}")
+            done <<< "${VAR_FILE_ARGS}"
+          fi
+          args+=(.)
+          build_args+=(.)
+
+          bootstrap_output_dir="${SECURE_PACKER_BOOTSTRAPPER_DIR}/artifacts"
+          askpass_script="${SECURE_PACKER_BOOTSTRAPPER_DIR}/ssh-add-askpass.sh"
+
+          cleanup() {
+            rm -f "${askpass_script}"
+            if [[ -n "${SSH_AGENT_PID:-}" ]]; then
+              ssh-agent -k >/dev/null 2>&1 || true
+            fi
+          }
+          trap cleanup EXIT
+
+          eval "$("${SECURE_PACKER_BOOTSTRAPPER_BUNDLE}" --output-dir "${bootstrap_output_dir}")"
+
+          required_bootstrap_variables=(
+            PKR_VAR_deploy_user_password
+            PKR_VAR_deploy_user_password_hash
+            PKR_VAR_deploy_user_key
+            SPB_SSH_PRIVATE_KEY_FILE
+            SPB_SSH_KEY_PASSPHRASE
+          )
+          for variable_name in "${required_bootstrap_variables[@]}"; do
+            variable_value="${!variable_name:-}"
+            if [[ -z "${variable_value//[[:space:]]/}" ]]; then
+              echo "::error::secure-packer-bootstrapper did not export ${variable_name}" >&2
+              exit 1
+            fi
+          done
+
+          cat > "${askpass_script}" <<'SH'
+          #!/usr/bin/env bash
+          printf '%s\n' "${SPB_SSH_KEY_PASSPHRASE}"
+          SH
+          chmod 700 "${askpass_script}"
+
+          eval "$(ssh-agent -s)" >/dev/null
+          SSH_ASKPASS="${askpass_script}" \
+            SSH_ASKPASS_REQUIRE=force \
+            DISPLAY=:0 \
+            setsid -w ssh-add "${SPB_SSH_PRIVATE_KEY_FILE}" < /dev/null
+          ssh-add -l >/dev/null
+
+          packer "${args[@]}"
+          packer "${build_args[@]}"
+
+      - name: Record build status
+        id: status
+        env:
+          BUILD_ENABLED: ${{ inputs.build }}
+        run: |
+          set -euo pipefail
+          if [ "${BUILD_ENABLED}" = "true" ]; then
+            echo "build_status=built" >> "${GITHUB_OUTPUT}"
+          else
+            echo "build_status=validated" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Upload generated Packer evidence
+        if: ${{ always() && inputs.upload_artifacts }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        with:
+          name: packer-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            framework/packer/artifacts/**
+            framework/packer/manifests/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Cleanup secure-packer-bootstrapper artifacts
+        if: ${{ always() && inputs.build }}
+        run: rm -rf "${RUNNER_TEMP}/secure-packer-bootstrapper"
