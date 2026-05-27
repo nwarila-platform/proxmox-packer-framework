@@ -103,12 +103,6 @@ variable "ansible_config" {
 
 #region ------ [ Packer Image ] -------------------------------------------------------------- #
 
-variable "media_profile" {
-  type        = string
-  default     = null
-  description = "Optional framework-managed media profile key. When unset, the framework attempts to infer a bundled profile from packer_image.os_name and packer_image.os_version. Explicit boot_iso values still take precedence."
-}
-
 variable "packer_image" {
   description = "The primary configuration object for the Proxmox VM template. Defines OS metadata, hardware specs, boot settings, cloud-init options, and Proxmox placement (node, pool, VM ID)."
   type = object({
@@ -221,7 +215,7 @@ variable "additional_iso_files" {
 }
 
 variable "boot_iso" {
-  description = "The boot ISO configuration for the VM. When null, the framework falls back to a bundled media profile if one is available."
+  description = "The boot ISO configuration for the VM. ISO lifecycle is owned externally (see docs/architecture.md). Consumers must supply this value — typically rendered from the Terraform-managed ISO module output into an auto-loaded pkrvars file."
   default     = null
   type = object({
     iso_checksum         = string

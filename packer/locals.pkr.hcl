@@ -105,41 +105,6 @@ locals {
 
   #endregion --- [ Packer Image Normalization ] ---------------------------------------------- #
 
-  #region ------ [ Bundled Media Profiles ] -------------------------------------------------- #
-
-  framework_media_catalog = jsondecode(file("${path.root}/iso/catalog.json"))
-
-  framework_media_profile_aliases = {
-    "rocky-9"             = "rocky-linux-9"
-    "ubuntu-24.04"        = "ubuntu-24-04-lts"
-    "windows-server-2022" = "windows-server-2022"
-  }
-
-  inferred_media_profile = try(
-    local.framework_media_profile_aliases["${local.packer_image.os_name}-${local.packer_image.os_version}"],
-    null
-  )
-
-  selected_media_profile_key = var.media_profile != null ? var.media_profile : local.inferred_media_profile
-
-  selected_media_profile = local.selected_media_profile_key == null ? null : try(
-    local.framework_media_catalog[local.selected_media_profile_key],
-    null
-  )
-
-  effective_boot_iso = (
-    var.boot_iso != null
-    ? var.boot_iso
-    : (local.selected_media_profile == null ? null : try(local.selected_media_profile.boot_iso, null))
-  )
-
-  effective_additional_iso_files = concat(
-    local.selected_media_profile == null ? [] : try(local.selected_media_profile.additional_iso_files, []),
-    var.additional_iso_files
-  )
-
-  #endregion --- [ Bundled Media Profiles ] ---------------------------------------------------- #
-
   #region ------ [ Template Variable Contract ] ------------------------------------------------ #
 
   template_vars = {
@@ -223,7 +188,7 @@ locals {
   additional_iso_files = concat(
     local.install_iso,
     [
-      for additional_iso_file in local.effective_additional_iso_files : {
+      for additional_iso_file in var.additional_iso_files : {
         cd_content       = additional_iso_file.cd_content
         cd_files         = additional_iso_file.cd_files
         cd_label         = additional_iso_file.cd_label
@@ -245,22 +210,22 @@ locals {
     ]
   )
 
-  boot_iso = local.effective_boot_iso == null ? null : {
-    cd_label         = coalesce(local.effective_boot_iso.cd_label, "BOOTISO")
-    iso_checksum     = local.effective_boot_iso.iso_checksum
-    iso_file         = local.effective_boot_iso.iso_file
-    iso_urls         = local.effective_boot_iso.iso_urls
-    index            = coalesce(local.effective_boot_iso.index, 10)
-    iso_download_pve = coalesce(local.effective_boot_iso.iso_download_pve, false)
+  boot_iso = var.boot_iso == null ? null : {
+    cd_label         = coalesce(var.boot_iso.cd_label, "BOOTISO")
+    iso_checksum     = var.boot_iso.iso_checksum
+    iso_file         = var.boot_iso.iso_file
+    iso_urls         = var.boot_iso.iso_urls
+    index            = coalesce(var.boot_iso.index, 10)
+    iso_download_pve = coalesce(var.boot_iso.iso_download_pve, false)
     iso_storage_pool = coalesce(
-      local.effective_boot_iso.iso_storage_pool,
+      var.boot_iso.iso_storage_pool,
       local.disks[0].storage_pool
     )
-    iso_target_extension = coalesce(local.effective_boot_iso.iso_target_extension, "iso")
-    iso_target_path      = local.effective_boot_iso.iso_target_path
-    keep_cdrom_device    = coalesce(local.effective_boot_iso.keep_cdrom_device, false)
-    type                 = coalesce(local.effective_boot_iso.type, "scsi")
-    unmount              = coalesce(local.effective_boot_iso.unmount, true)
+    iso_target_extension = coalesce(var.boot_iso.iso_target_extension, "iso")
+    iso_target_path      = var.boot_iso.iso_target_path
+    keep_cdrom_device    = coalesce(var.boot_iso.keep_cdrom_device, false)
+    type                 = coalesce(var.boot_iso.type, "scsi")
+    unmount              = coalesce(var.boot_iso.unmount, true)
   }
 
   disks = [

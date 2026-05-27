@@ -119,13 +119,6 @@
 !packer/source.pkr.hcl
 !packer/variables.pkr.hcl
 
-# --- packer/iso ---
-!packer/iso/
-!packer/iso/catalog.json
-!packer/iso/rocky-linux-9.pkrvars.hcl
-!packer/iso/ubuntu-24-04-lts.pkrvars.hcl
-!packer/iso/windows-server-2022.pkrvars.hcl
-
 # --- packer/artifacts, manifests (keep dir, not contents) ---
 !packer/artifacts/
 !packer/artifacts/.gitkeep

@@ -53,14 +53,20 @@ The default shared source for Ansible content is
 
 ## ISO Lifecycle Boundary
 
-The repository currently supports two ISO-management layers:
+This framework does not download, store, or pin ISO media. ISO lifecycle on Proxmox storage is owned by [`nwarila-platform/terraform-proxmox-iso-manager-framework`](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework). Runner repos (for example `secure-rockylinux9-template`) call that Terraform module to download and SHA-verify the ISO onto Proxmox storage, then emit a Packer-shaped pkrvars file that this framework consumes via the reusable workflow's `var_file` input.
 
-- `terraform/` can download and manage ISO lifecycle on Proxmox storage.
-- `packer/iso/catalog.json` provides the bundled Packer-side media catalog, with `packer/iso/*.pkrvars.hcl` still available as explicit override files.
+The integration contract is just two variables this framework declares in [`packer/variables.pkr.hcl`](../packer/variables.pkr.hcl):
 
-For the shipped OS families, the framework can infer a bundled media profile from `packer_image.os_name` and `packer_image.os_version`. Consumers can still override the inferred profile with `media_profile`, `boot_iso`, or `additional_iso_files`.
+- `boot_iso` — typed object. Set from the Terraform module's `iso_path` and `iso_sha256` outputs.
+- `additional_iso_files` — list of typed objects. Set from additional Terraform `module "iso"` instances (e.g. virtio-win for Windows builds).
 
-Today, those bundled media defaults are still committed in this repository. That is an intentional transitional state while a dedicated external media-tracking repository is being prepared. Until that external handoff exists, Terraform-backed media management and Packer-side media defaults must be kept in sync by maintainers.
+Recommended runner-repo flow:
+
+1. `terraform apply` in the runner repo invokes `module "iso"` and emits a `*.auto.pkrvars.hcl` file containing the `boot_iso` (and any `additional_iso_files`) object literals.
+2. The runner repo commits that file — the diff history is the long-lived audit trail of which ISO each build consumed.
+3. The runner repo's CI calls this framework's reusable workflow with `var_file:` pointing at the emitted file.
+
+This framework keeps no bundled media defaults. Builds without an explicit `boot_iso` will fail at validate time, which is intentional — there is no inferred fallback.
 
 ## Packer Subdirectory Layout
 
@@ -83,6 +89,3 @@ CI workflows and README instructions reference this path consistently via
 | `source.pkr.hcl` | Proxmox ISO source definition with dynamic hardware blocks |
 | `builds.pkr.hcl` | Build definition with consumer-driven Ansible provisioner and manifest |
 | `data.pkr.hcl` | Git data source for build metadata |
-| `packer/iso/catalog.json` | Bundled media catalog used for inferred Rocky, Ubuntu, and Windows ISO defaults |
-| `packer/iso/*.pkrvars.hcl` | Explicit media override files retained for compatibility and future handoff work |
-| `terraform/*.tf` | Optional Terraform helper for managing ISO lifecycle on Proxmox storage |

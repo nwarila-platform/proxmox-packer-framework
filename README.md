@@ -18,13 +18,13 @@ The framework does not decide which packages, hardening profile, or application 
 | Layer | Owner | Default Source |
 |-------|-------|----------------|
 | Packer orchestration and variable contract | This framework | This repository |
-| ISO lifecycle on Proxmox storage | [proxmox-media-infra](https://github.com/nwarila-platform/proxmox-media-infra) | `examples/terraform/` |
+| ISO download and SHA verification on Proxmox storage | [terraform-proxmox-iso-manager-framework](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework) | Runner repo's Terraform |
 | OS installer templates | Consumer repo | Shipped installer examples in `examples/packer/` |
 | Ansible roles, playbooks, Galaxy requirements | Consumer repo | [ansible-framework](https://github.com/nwarila-platform/ansible-framework) |
 
 This repository ships installer examples only. It does not ship Ansible roles, playbooks, inventories, or `ansible.cfg`; consumers import those from [ansible-framework](https://github.com/nwarila-platform/ansible-framework) or an equivalent repository.
 
-Today, the committed `packer/iso/*.pkrvars.hcl` files remain the bootstrap media source of truth. For the shipped Rocky, Ubuntu, and Windows families, the framework can infer those bundled media defaults automatically from `packer_image.os_name` and `packer_image.os_version`. Live Terraform for Proxmox ISO/media lifecycle lives in [proxmox-media-infra](https://github.com/nwarila-platform/proxmox-media-infra); this repository keeps only non-live Terraform examples that describe the shape of those inputs.
+ISO lifecycle is owned externally. Runner repos invoke `terraform-proxmox-iso-manager-framework` to download and SHA-verify the boot ISO onto Proxmox storage, then emit a `boot_iso` pkrvars file consumed by this framework's reusable workflow via its `var_file` input. See [docs/architecture.md](docs/architecture.md#iso-lifecycle-boundary).
 
 ## Architecture
 
@@ -49,17 +49,9 @@ The generic `install_template` contract supports any guest OS that can boot from
 
 Bootstrap examples are validated in CI, but consumers are still expected to:
 
-- replace shipped media values if their environment uses different ISO locations or checksums
+- supply `boot_iso` (and any `additional_iso_files`) from their runner-repo Terraform that calls `terraform-proxmox-iso-manager-framework`
 - point `ansible_config.*` paths at consumer-owned Ansible content
 - decide whether example TLS and WinRM settings are acceptable bootstrap exceptions for their environment
-
-Supported bundled media defaults are inferred for:
-
-- `rocky` + `9`
-- `ubuntu` + `24.04`
-- `windows-server` + `2022`
-
-Consumers can still override those defaults explicitly with `media_profile`, `boot_iso`, or `additional_iso_files`.
 
 ## Prerequisites
 
@@ -109,11 +101,9 @@ The `.env.example` files are templates for values you should export into your sh
 - edit `my-rocky.pkrvars.hcl` for network, storage, hardware, and installer settings
 - point `install_template.template_path` and `ansible_config.*` paths at consumer-owned content
 
-For the shipped Rocky, Ubuntu, and Windows families, you do not need a separate ISO var file just to validate or build. The framework will resolve the bundled media defaults automatically unless you override them.
+The framework requires `boot_iso` (and any `additional_iso_files`) to be supplied by the caller — there are no bundled media defaults. In production, runner repos render those blocks from [`terraform-proxmox-iso-manager-framework`](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework) outputs into an auto-loaded pkrvars file. For local validate runs, the example pkrvars files under `examples/packer/` pin known-good Proxmox storage paths and SHA-256 checksums directly.
 
 The framework also accepts `PKR_VAR_proxmox_skip_tls_verify` and `PKR_VAR_proxmox_node` as top-level CI-friendly overrides for the matching nested `packer_image` fields.
-
-If you want Terraform to manage ISO lifecycle, use [proxmox-media-infra](https://github.com/nwarila-platform/proxmox-media-infra). This framework does not own Terraform state or Proxmox media apply workflows.
 
 ### 4. Validate and build
 
@@ -249,7 +239,7 @@ This framework produces Proxmox VM templates designed to be consumed by Terrafor
 
 - `install_template` pointing at consumer-owned installer templates
 - `ansible_config` pointing at consumer-owned Ansible content, with `ansible-playbook` available on PATH in the runtime environment
-- `packer_image.os_name` and `packer_image.os_version` matching a bundled media family, or explicit media overrides
+- `boot_iso` (and any `additional_iso_files`) rendered from a runner-repo Terraform call to `terraform-proxmox-iso-manager-framework`
 
 The build timestamp in `template_description` can be used to trigger downstream VM replacement when a new template is published.
 
