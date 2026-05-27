@@ -80,6 +80,43 @@ validate_example() {
     .
 }
 
+assert_boot_iso_required() {
+  local example_file="$1"
+  local override_file="$tmp_dir/boot-iso-required.pkrvars.hcl"
+  local null_boot_iso_file="$tmp_dir/boot-iso-null.pkrvars.hcl"
+  local expected_message="The boot_iso value must be supplied explicitly by the caller."
+  local output
+  local status
+
+  create_override_file "$override_file"
+  cat > "$null_boot_iso_file" <<'EOF'
+boot_iso = null
+EOF
+
+  echo "Validating boot_iso required guard..."
+  set +e
+  output="$(
+    packer validate \
+      -var-file="$example_file" \
+      -var-file="$override_file" \
+      -var-file="$null_boot_iso_file" \
+      . 2>&1
+  )"
+  status="$?"
+  set -e
+
+  if [ "$status" -eq 0 ]; then
+    echo "::error::packer validate succeeded with boot_iso = null" >&2
+    exit 1
+  fi
+
+  if [[ "$output" != *"$expected_message"* ]]; then
+    echo "::error::missing expected boot_iso validation message" >&2
+    printf '%s\n' "$output" >&2
+    exit 1
+  fi
+}
+
 cd "$packer_dir"
 packer init .
 
@@ -92,3 +129,6 @@ validate_example \
 validate_example \
   "windows-server-2022" \
   "$repo_root/examples/packer/windows-server-2022/windows-server-2022.pkrvars.hcl"
+
+assert_boot_iso_required \
+  "$repo_root/examples/packer/rocky-linux-9/rocky-linux-9.pkrvars.hcl"

@@ -59,6 +59,7 @@
 # --- docs ---
 !docs/
 !docs/architecture.md
+!docs/handoff.md
 !docs/template-contract.md
 !docs/decision-records/
 !docs/decision-records/org/

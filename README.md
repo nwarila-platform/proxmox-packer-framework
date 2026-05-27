@@ -143,8 +143,7 @@ proxmox-packer-framework/
 |-- .vscode/
 |-- docs/
 |   |-- architecture.md
-|   |-- template-contract.md
-|   `-- REQUIREMENTS.md
+|   `-- template-contract.md
 |-- examples/
 |   |-- packer/
 |   |   |-- .env.example
@@ -156,7 +155,6 @@ proxmox-packer-framework/
 |       |-- README.md
 |       `-- terraform.tfvars.example
 |-- packer/
-|   |-- iso/
 |   |-- builds.pkr.hcl
 |   |-- data.pkr.hcl
 |   |-- locals.pkr.hcl
