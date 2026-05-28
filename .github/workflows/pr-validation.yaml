@@ -4,15 +4,7 @@ name: PR Validation
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'packer/**'
-      - 'examples/**'
-      - 'contract/**'
-      - 'tools/**'
-      - 'docs/template-contract.md'
-      - '.github/scripts/**'
-      - '.github/workflows/**'
-      - '.pre-commit.config.yaml'
+  merge_group: {}
   workflow_dispatch: {}
 
 permissions:

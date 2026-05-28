@@ -5,7 +5,7 @@
 !.gitignore
 !.gitattributes
 !.editorconfig
-!.pre-commit.config.yaml
+!.pre-commit-config.yaml
 !.release-please-manifest.json
 !release-please-config.json
 !CHANGELOG.md

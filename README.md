@@ -163,7 +163,7 @@ proxmox-packer-framework/
 |   `-- variables.pkr.hcl
 |-- .editorconfig
 |-- .gitattributes
-|-- .pre-commit.config.yaml
+|-- .pre-commit-config.yaml
 |-- .release-please-manifest.json
 |-- release-please-config.json
 |-- CHANGELOG.md
@@ -179,8 +179,8 @@ proxmox-packer-framework/
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
 | Feature Push Gate | Push to any non-`main` branch | Gitleaks secret scan |
-| Main Validation | Push to `main` for `packer/**`, `examples/**`, `contract/**`, `tools/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit.config.yaml` | Gitleaks, reusable workflow contract checks, Packer fmt/validate |
-| PR Validation | PR to `main` for `packer/**`, `examples/**`, `contract/**`, `tools/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit.config.yaml` | Gitleaks, reusable workflow contract checks, Packer fmt/validate |
+| Main Validation | Push to `main` for `packer/**`, `examples/**`, `contract/**`, `tools/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit-config.yaml` | Gitleaks, reusable workflow contract checks, Packer fmt/validate |
+| PR Validation | Every PR to `main` (and merge queue) | Gitleaks, reusable workflow contract checks, Packer fmt/validate |
 | Security Scanning | Push/PR to `main`, weekly schedule | Trivy filesystem scan plus Gitleaks |
 | Release Please | Push to `main` | Automated changelog generation and GitHub releases |
 
