@@ -1,0 +1,62 @@
+name: Release
+
+# Optional release entrypoint for release-please and release evidence.
+# Trusted-bot auto-merge lives elsewhere so pull_request_target stays isolated
+# from release publishing paths.
+
+on:
+  push:
+    branches: [main]
+  # Human-published releases still enter through this event. The normal
+  # release-please path publishes with GITHUB_TOKEN, whose release events do
+  # not cascade, so reusable-release-please.yaml dispatches `release-evidence`
+  # explicitly after it creates a release.
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Release task to run.
+        required: true
+        type: choice
+        default: release-please
+        options:
+          - release-please
+          - release-evidence
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    # Push-triggered release-please needs the repository setting that allows
+    # GitHub Actions to create pull requests. Keep that path opt-in so a fresh
+    # consumer repo does not start with a red main check.
+    if: ${{ (github.event_name == 'push' && vars.RELEASE_PLEASE_ON_PUSH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-please') }}
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    uses: NWarila/.github/.github/workflows/reusable-release-please.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
+
+  evidence:
+    name: Release Evidence
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-evidence') }}
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    # ppf is a consumer of packer-framework-template and has no local evidence
+    # reusable, so it calls the template's by SHA. Pinned to the current
+    # packer-framework-template main.
+    uses: NWarila/packer-framework-template/.github/workflows/reusable-release-evidence.yaml@7ecec6f9ccf4f11620f16a600bdae7e6e4db84cc
+    with:
+      # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
+      packer_version: "1.15.0"
+      repo_type: framework
