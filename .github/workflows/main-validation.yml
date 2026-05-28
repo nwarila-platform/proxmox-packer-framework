@@ -8,7 +8,7 @@ on:
       - 'examples/**'
       - 'contract/**'
       - 'tools/**'
-      - 'docs/template-contract.md'
+      - 'docs/reference/template-contract.md'
       - '.github/scripts/**'
       - '.github/workflows/**'
       - '.pre-commit-config.yaml'

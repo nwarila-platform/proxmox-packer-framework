@@ -62,6 +62,7 @@
 !docs/
 !docs/README.md
 !docs/decision-records/
+!docs/decision-records/README.md
 !docs/decision-records/org/
 !docs/decision-records/org/.gitkeep
 !docs/decision-records/org/0001-use-architecture-decision-records.md
@@ -117,7 +118,6 @@
 
 # --- packer ---
 !packer/
-!packer/.gitkeep
 !packer/builds.pkr.hcl
 !packer/data.pkr.hcl
 !packer/locals.pkr.hcl
