@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.0](https://github.com/nwarila-platform/proxmox-packer-framework/compare/v0.0.1...v0.1.0) (2026-05-28)
+
+
+### Features
+
+* **ci:** expose reusable Packer framework workflow ([11adc3c](https://github.com/nwarila-platform/proxmox-packer-framework/commit/11adc3c940b62c56f9dba56039b2fa27c23e270b))
+* **release:** migrate to org reusable-release-please + release evidence ([#31](https://github.com/nwarila-platform/proxmox-packer-framework/issues/31)) ([e1a9960](https://github.com/nwarila-platform/proxmox-packer-framework/commit/e1a99606bf61dd128510eafbb50c9ce824ee7f6b))
+* **release:** ppf-appropriate release evidence (SBOM + provenance) ([#32](https://github.com/nwarila-platform/proxmox-packer-framework/issues/32)) ([77543cb](https://github.com/nwarila-platform/proxmox-packer-framework/commit/77543cbbcbf43218d488aee98ddf7cf1bd873222))
+
+
+### Bug Fixes
+
+* **ci:** correct pre-commit config name and gate all PRs ([#27](https://github.com/nwarila-platform/proxmox-packer-framework/issues/27)) ([4a79a54](https://github.com/nwarila-platform/proxmox-packer-framework/commit/4a79a54b634028639a5e935617fbfca28ac33a79))
+
+
+### Refactoring
+
+* **packer:** hand ISO lifecycle to terraform-proxmox-iso-manager-framework ([#23](https://github.com/nwarila-platform/proxmox-packer-framework/issues/23)) ([9f8f312](https://github.com/nwarila-platform/proxmox-packer-framework/commit/9f8f31266bdde4e6a1e6a38b3536fdfd6427dc79))
+
+
+### CI/CD
+
+* **align:** drift-gate type-template baseline + tidy docs (Diataxis) ([#30](https://github.com/nwarila-platform/proxmox-packer-framework/issues/30)) ([bc69aab](https://github.com/nwarila-platform/proxmox-packer-framework/commit/bc69aab6d015888b83a3b40bd7f6194ffa08549b))
+* **deps:** migrate from Dependabot to Renovate (ADR-0004) ([#29](https://github.com/nwarila-platform/proxmox-packer-framework/issues/29)) ([92e9106](https://github.com/nwarila-platform/proxmox-packer-framework/commit/92e91062b79edaf7be4a6f6cb8dfd872ab73cb87))
+* fix shellcheck SC2181 in packer-fmt step ([#26](https://github.com/nwarila-platform/proxmox-packer-framework/issues/26)) ([b3029c6](https://github.com/nwarila-platform/proxmox-packer-framework/commit/b3029c6d94558cf3bac58fe8c7508792f7877ecc))
+* **security:** call org reusables + add repo-hygiene caller ([#28](https://github.com/nwarila-platform/proxmox-packer-framework/issues/28)) ([fc7ae0a](https://github.com/nwarila-platform/proxmox-packer-framework/commit/fc7ae0a6ab221823840f5363becc889b6e72d60c))
+
 ## 0.0.1 (2026-05-04)
 
 
