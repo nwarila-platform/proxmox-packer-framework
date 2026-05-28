@@ -1,0 +1,134 @@
+---
+name: Reusable Release Evidence
+
+# ppf-appropriate release-evidence reusable, local to this repository.
+#
+# proxmox-packer-framework is a Packer *framework* (it exposes
+# reusable-packer-framework-build.yaml and produces Proxmox VM templates), not
+# a single-image build. The packer-framework-template's shared
+# reusable-release-evidence.yaml framework path assumes template-only tooling
+# (tools/verify.py, tools/check_packer_plugin_provenance.py,
+# examples/linux/reference-linux.pkrvars.hcl) that this repo does not have, so
+# this repo ships its own evidence reusable built on ppf's ACTUAL structure.
+#
+# It produces three recruiter-grade evidence parts on every release:
+#   1. Framework validity - ppf's own credential-free validation: install the
+#      pinned Packer version, `packer init`, `packer fmt -check`, and
+#      .github/scripts/validate_examples.sh (the exact gate PR validation uses).
+#   2. SBOM - an SPDX-JSON SBOM of the repository via syft (anchore/sbom-action).
+#   3. Build provenance - actions/attest-build-provenance attesting the
+#      generated SBOM file (a concrete subject), proving it was produced by this
+#      workflow on this repository at the release SHA.
+#
+# No template-only tooling is referenced; every step targets a path/script that
+# exists in this repo.
+
+on:
+  workflow_call:
+    inputs:
+      packer_version:
+        description: |
+          Exact Packer CLI version to install for framework validation. Defaults
+          to the repo's pinned version (packer/packer.pkr.hcl required_version).
+        required: false
+        type: string
+        default: "1.15.0"
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    name: Build release evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository at release SHA
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Packer
+        uses: hashicorp/setup-packer@1aa358be5cf73883762b302a3a03abd66e75b232 # v3.1.0
+        with:
+          version: ${{ inputs.packer_version }}
+
+      - name: Packer init
+        working-directory: packer
+        run: packer init .
+
+      - name: Packer fmt (check)
+        working-directory: packer
+        run: |
+          set -euo pipefail
+          if ! packer fmt -check -recursive .; then
+            echo "::error::Packer files need formatting. Run: packer fmt -recursive ./packer"
+            exit 1
+          fi
+
+      - name: Validate Packer examples
+        run: |
+          set -euo pipefail
+          bash "${GITHUB_WORKSPACE}/.github/scripts/validate_examples.sh"
+
+      - name: Record framework-validity evidence
+        env:
+          OUT: release-evidence
+          PACKER_VERSION: ${{ inputs.packer_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p "${OUT}"
+          packer version > "${OUT}/packer-version.txt"
+          {
+            echo "release_sha=${GITHUB_SHA}"
+            echo "release_ref=${GITHUB_REF}"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "packer_version=${PACKER_VERSION}"
+            echo "validation=packer init + packer fmt -check + validate_examples.sh"
+          } > "${OUT}/metadata.txt"
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: .
+          format: spdx-json
+          output-file: release-evidence.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+
+      - name: Attest SBOM build provenance
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: release-evidence.spdx.json
+
+      - name: Upload evidence to workflow run
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-evidence
+          path: |
+            release-evidence.spdx.json
+            release-evidence/**
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Attach evidence to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAG}" ] || [[ "${TAG}" == refs/* ]]; then
+            echo "::warning::no release tag in context (TAG='${TAG}'); skipping release upload."
+            exit 0
+          fi
+          gh release upload "${TAG}" release-evidence.spdx.json
