@@ -8,7 +8,7 @@ Terraform apply workflows, or Proxmox ISO/media lifecycle credentials.
 Runner OS-template repositories that call this framework's reusable Packer
 workflow do still need their own Terraform step to render a `boot_iso` (and any
 `additional_iso_files`) pkrvars file. The framework's `boot_iso` variable is
-required; see [`docs/architecture.md`](../../docs/architecture.md#iso-lifecycle-boundary).
+required; see [`docs/explanation/architecture.md`](../../docs/explanation/architecture.md#iso-lifecycle-boundary).
 The rendered pkrvars file is consumed through the reusable workflow's `var_file`
 input.
 

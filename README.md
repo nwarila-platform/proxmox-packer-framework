@@ -24,7 +24,7 @@ The framework does not decide which packages, hardening profile, or application 
 
 This repository ships installer examples only. It does not ship Ansible roles, playbooks, inventories, or `ansible.cfg`; consumers import those from [ansible-framework](https://github.com/nwarila-platform/ansible-framework) or an equivalent repository.
 
-ISO lifecycle is owned externally. Runner repos invoke `terraform-proxmox-iso-manager-framework` to download and SHA-verify the boot ISO onto Proxmox storage, then emit a `boot_iso` pkrvars file consumed by this framework's reusable workflow via its `var_file` input. See [docs/architecture.md](docs/architecture.md#iso-lifecycle-boundary).
+ISO lifecycle is owned externally. Runner repos invoke `terraform-proxmox-iso-manager-framework` to download and SHA-verify the boot ISO onto Proxmox storage, then emit a `boot_iso` pkrvars file consumed by this framework's reusable workflow via its `var_file` input. See [docs/explanation/architecture.md](docs/explanation/architecture.md#iso-lifecycle-boundary).
 
 ## Architecture
 
@@ -35,7 +35,7 @@ At a high level:
 3. `packer/source.pkr.hcl` maps the normalized values into the Proxmox ISO builder.
 4. `packer/builds.pkr.hcl` runs the consumer-provided installer template, then the consumer-provided Ansible playbook.
 
-See [docs/architecture.md](docs/architecture.md) for design decisions and [docs/template-contract.md](docs/template-contract.md) for the template variable contract.
+See [docs/explanation/architecture.md](docs/explanation/architecture.md) for design decisions and [docs/reference/template-contract.md](docs/reference/template-contract.md) for the template variable contract.
 
 ## Supported Operating Systems
 

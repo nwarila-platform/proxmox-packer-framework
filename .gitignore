@@ -59,9 +59,7 @@
 
 # --- docs ---
 !docs/
-!docs/architecture.md
-!docs/handoff.md
-!docs/template-contract.md
+!docs/README.md
 !docs/decision-records/
 !docs/decision-records/org/
 !docs/decision-records/org/.gitkeep
@@ -79,8 +77,13 @@
 !docs/how-to/.gitkeep
 !docs/reference/
 !docs/reference/.gitkeep
+!docs/reference/mirroring.md
+!docs/reference/runner-protocol.md
+!docs/reference/template-contract.md
 !docs/explanation/
 !docs/explanation/.gitkeep
+!docs/explanation/architecture.md
+!docs/explanation/handoff.md
 
 # --- Contract and tools ---
 !contract/

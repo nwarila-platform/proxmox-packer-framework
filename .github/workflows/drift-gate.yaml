@@ -27,3 +27,17 @@ jobs:
           source-ref: 8e890d1f41fc2e4fb6162af13729ca1dfd232dd7 # main @ 2026-05-27
           manifest: baseline-manifest.json
           check-name: org-baseline / verify
+
+  template-baseline:
+    name: template-baseline / verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Drift gate (packer framework template baseline)
+        # renovate: depName=NWarila/packer-framework-template packageName=NWarila/packer-framework-template currentValue=main
+        uses: NWarila/drift-gate@dd091e7d730b2711e09bf86c8d66b7e9b873dd53 # main @ 2026-05-27
+        with:
+          source-repo: NWarila/packer-framework-template
+          source-ref: 1eeecd63bff35bf91f54b89118651c58c3ec5645 # main @ 2026-05-28
+          manifest: baseline-manifest.json
+          check-name: template-baseline / verify
