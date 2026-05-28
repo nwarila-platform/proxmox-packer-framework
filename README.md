@@ -1,5 +1,10 @@
 # Proxmox Packer Framework
 
+[![CI](https://github.com/nwarila-platform/proxmox-packer-framework/actions/workflows/main-validation.yml/badge.svg)](https://github.com/nwarila-platform/proxmox-packer-framework/actions/workflows/main-validation.yml)
+[![Security](https://github.com/nwarila-platform/proxmox-packer-framework/actions/workflows/security.yaml/badge.svg)](https://github.com/nwarila-platform/proxmox-packer-framework/actions/workflows/security.yaml)
+[![Release](https://img.shields.io/github/v/release/nwarila-platform/proxmox-packer-framework)](https://github.com/nwarila-platform/proxmox-packer-framework/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A data-driven [Packer](https://www.packer.io/) framework for building hardened Proxmox VE VM templates. The framework owns the Proxmox builder contract, normalization layer, and CI validation flow. Consumer repositories bring their own installer templates, Ansible content, and environment-specific values.
 
 ## Purpose
