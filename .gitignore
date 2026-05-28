@@ -48,6 +48,7 @@
 !.github/workflows/release.yaml
 !.github/workflows/drift-gate.yaml
 !.github/workflows/reusable-packer-framework-build.yaml
+!.github/workflows/reusable-release-evidence.yaml
 !.github/workflows/security.yaml
 !.github/workflows/repo-hygiene.yaml
 

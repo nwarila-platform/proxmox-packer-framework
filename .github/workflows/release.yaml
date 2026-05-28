@@ -52,11 +52,12 @@ jobs:
       attestations: write
       contents: write
       id-token: write
-    # ppf is a consumer of packer-framework-template and has no local evidence
-    # reusable, so it calls the template's by SHA. Pinned to the current
-    # packer-framework-template main.
-    uses: NWarila/packer-framework-template/.github/workflows/reusable-release-evidence.yaml@7ecec6f9ccf4f11620f16a600bdae7e6e4db84cc
+    # ppf is a Packer framework with its own structure (examples/packer/*,
+    # .github/scripts/validate_examples.sh), so it ships a local, ppf-appropriate
+    # evidence reusable instead of force-fitting the template's framework path
+    # (which requires tools/verify.py / check_packer_plugin_provenance.py /
+    # examples/linux that this repo does not have).
+    uses: ./.github/workflows/reusable-release-evidence.yaml
     with:
       # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
       packer_version: "1.15.0"
-      repo_type: framework
