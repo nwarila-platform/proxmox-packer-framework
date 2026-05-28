@@ -1,95 +1,50 @@
-name: Security Scanning
+name: Security
+
+# One visible security entrypoint. The detailed implementations live in the
+# org-owned reusable workflows (NWarila/.github), pinned by SHA, so this
+# consumer runs exactly the same IaC/secret, CodeQL, and Scorecard checks as
+# every other repo in the fleet.
 
 on:
+  branch_protection_rule:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  merge_group:
   schedule:
-    - cron: "0 8 * * 1"  # Weekly — Monday 08:00 UTC
+    - cron: "0 8 * * 1"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  security-events: write
-  actions: read
+permissions: {}
+
+concurrency:
+  group: security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  trivy:
-    name: Trivy
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  iac:
+    name: IaC and secret scan
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: NWarila/.github/.github/workflows/reusable-iac-security.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          fetch-depth: 1
-          persist-credentials: false
+  codeql:
+    name: CodeQL
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: NWarila/.github/.github/workflows/reusable-codeql.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
 
-      - name: Run Trivy — filesystem scan (SARIF)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: sarif
-          output: trivy.sarif
-          severity: HIGH,CRITICAL
-          scanners: misconfig,secret
-          exit-code: "1"
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
-        if: ${{ !cancelled() }}
-        with:
-          sarif_file: trivy.sarif
-          category: trivy
-
-      - name: Upload Trivy SARIF as artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        if: ${{ !cancelled() }}
-        with:
-          name: trivy-sarif
-          path: trivy.sarif
-          retention-days: 30
-
-  gitleaks:
-    name: Gitleaks
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Install Gitleaks CLI
-        shell: bash
-        env:
-          GITLEAKS_VERSION: '8.30.0'
-          GITLEAKS_SHA256: '79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e'
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location \
-            --retry 5 --retry-delay 2 --retry-connrefused --connect-timeout 15 \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
-            -o /tmp/gitleaks.tar.gz
-          printf '%s  %s\n' "${GITLEAKS_SHA256}" /tmp/gitleaks.tar.gz | sha256sum -c -
-          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
-          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
-          gitleaks version
-
-      - name: Run Gitleaks — secret detection
-        shell: bash
-        run: |
-          set -euo pipefail
-          gitleaks detect \
-            --source . \
-            --config "${{ github.workspace }}/.github/config/gitleaks.toml" \
-            --redact \
-            --verbose \
-            --no-banner
+  scorecard:
+    name: OpenSSF Scorecard
+    if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
+    permissions:
+      security-events: write
+      id-token: write
+      actions: read
+      contents: read
+    uses: NWarila/.github/.github/workflows/reusable-scorecard.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
