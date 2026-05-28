@@ -1,9 +1,7 @@
 name: Security
 
-# One visible security entrypoint. The detailed implementations live in the
-# org-owned reusable workflows (NWarila/.github), pinned by SHA, so this
-# consumer runs exactly the same IaC/secret, CodeQL, and Scorecard checks as
-# every other repo in the fleet.
+# One visible security entrypoint. The detailed implementations stay in local
+# reusable workflows so consumers can pin the same checks by SHA.
 
 on:
   branch_protection_rule:
