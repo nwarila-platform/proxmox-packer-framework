@@ -49,6 +49,7 @@
 !.github/workflows/drift-gate.yaml
 !.github/workflows/reusable-packer-framework-build.yaml
 !.github/workflows/security.yaml
+!.github/workflows/repo-hygiene.yaml
 
 # --- .vscode ---
 !.vscode/
