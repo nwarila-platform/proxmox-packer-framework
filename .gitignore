@@ -45,7 +45,7 @@
 !.github/workflows/main-validation.yml
 !.github/workflows/feature-push-gate.yml
 !.github/workflows/pr-validation.yaml
-!.github/workflows/release-please.yaml
+!.github/workflows/release.yaml
 !.github/workflows/drift-gate.yaml
 !.github/workflows/reusable-packer-framework-build.yaml
 !.github/workflows/security.yaml
