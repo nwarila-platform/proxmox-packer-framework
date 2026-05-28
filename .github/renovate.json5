@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  // Inherit the Packer-framework Renovate baseline from the type template
+  // (org ADR-0004). The type template owns the canonical, self-contained
+  // config (GitHub Actions pin-digests, Packer CLI + plugins, OPA, Python
+  // tooling, and SHA-body inputs). Renovate's extends: follows the preset's
+  // default branch and cannot be SHA-pinned; the org accepts that tradeoff.
+  // No consumer-specific overrides are needed today.
+  "extends": [
+    "github>NWarila/packer-framework-template"
+  ]
+}

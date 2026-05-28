@@ -26,7 +26,7 @@
 !.github/.gitkeep
 !.github/CODEOWNERS
 !.github/FUNDING.yml
-!.github/dependabot.yml
+!.github/renovate.json5
 !.github/pull_request_template.md
 !.github/actions/
 !.github/actions/.gitkeep
