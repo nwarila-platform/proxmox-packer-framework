@@ -182,11 +182,18 @@ proxmox-packer-framework/
 
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
-| Feature Push Gate | Push to any non-`main` branch | Gitleaks secret scan |
-| Main Validation | Push to `main` for `packer/**`, `examples/**`, `contract/**`, `tools/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit-config.yaml` | Gitleaks, reusable workflow contract checks, Packer fmt/validate |
-| PR Validation | Every PR to `main` (and merge queue) | Gitleaks, reusable workflow contract checks, Packer fmt/validate |
-| Security Scanning | Push/PR to `main`, weekly schedule | Trivy filesystem scan plus Gitleaks |
-| Release Please | Push to `main` | Automated changelog generation and GitHub releases |
+| Main Validation | Push to `main` touching `packer/**`, `examples/**`, `contract/**`, `tools/**`, `.github/scripts/**`, `.github/workflows/**`, `.pre-commit-config.yaml` (plus release-please outputs) | Reusable workflow contract check, Packer init/fmt/validate |
+| PR Validation | Every PR to `main` (and merge queue) | Reusable workflow contract check, Packer init/fmt/validate |
+| Security | Push/PR to `main`, merge queue, weekly schedule | Calls the org `reusable-iac-security` (Trivy IaC plus Gitleaks secret scan), `reusable-codeql`, and `reusable-scorecard` (OpenSSF Scorecard) reusables |
+| Drift Gate | Every PR to `main` | Verifies this repo against the org baseline and the `packer-framework-template` baseline manifests |
+| Repo Hygiene | PR to `main`, merge queue, weekly schedule | Calls the org `reusable-repo-hygiene` policy (SHA-pinned actions, exact pins, `pull_request_target` safety) |
+| Release | Push to `main` (opt-in via `RELEASE_PLEASE_ON_PUSH`) or a published release | Runs release-please for changelog/releases and publishes release evidence/attestations |
+
+Secret scanning and IaC scanning run once, in the Security workflow, through the org-owned
+`reusable-iac-security` reusable; the validation workflows no longer run Gitleaks inline. Two
+additional workflows are callable rather than event-triggered: `reusable-packer-framework-build.yaml`
+(the downstream build/validate entrypoint described below) and `reusable-release-evidence.yaml`
+(invoked by the Release workflow).
 
 ## Downstream Integration
 
