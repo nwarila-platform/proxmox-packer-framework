@@ -139,7 +139,6 @@ pre-commit install --hook-type commit-msg
 proxmox-packer-framework/
 |-- .config/
 |-- .github/
-|   |-- config/gitleaks.toml
 |   |-- scripts/
 |   |   |-- get_packer_version.sh
 |   |   |-- validate_examples.sh

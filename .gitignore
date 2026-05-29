@@ -31,7 +31,6 @@
 !.github/actions/
 !.github/actions/.gitkeep
 !.github/config/
-!.github/config/gitleaks.toml
 !.github/ISSUE_TEMPLATE/
 !.github/ISSUE_TEMPLATE/bug_report.yml
 !.github/ISSUE_TEMPLATE/feature_request.yml
