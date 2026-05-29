@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/nwarila-platform/proxmox-packer-framework/compare/v0.1.0...v0.1.1) (2026-05-29)
+
+
+### Documentation
+
+* sync README workflow table with post-gitleaks-cleanup reality ([#35](https://github.com/nwarila-platform/proxmox-packer-framework/issues/35)) ([c960fbd](https://github.com/nwarila-platform/proxmox-packer-framework/commit/c960fbdb06e94f516b1dc1fba37b52efba02ed45))
+
 ## [0.1.0](https://github.com/nwarila-platform/proxmox-packer-framework/compare/v0.0.1...v0.1.0) (2026-05-28)
 
 
