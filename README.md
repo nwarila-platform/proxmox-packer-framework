@@ -146,8 +146,10 @@ proxmox-packer-framework/
 |   `-- workflows/
 |-- .vscode/
 |-- docs/
-|   |-- architecture.md
-|   `-- template-contract.md
+|   |-- explanation/
+|   |   `-- architecture.md
+|   `-- reference/
+|       `-- template-contract.md
 |-- examples/
 |   |-- packer/
 |   |   |-- .env.example

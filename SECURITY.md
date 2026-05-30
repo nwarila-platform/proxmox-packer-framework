@@ -73,7 +73,8 @@ This project implements the following security controls:
 - **Hardened SSH communicator** with restricted ciphers and key exchange algorithms
 - **UEFI/Secure Boot and TPM 2.0** support with secure defaults
 - **Secret scanning** via Gitleaks in the Security workflow (org `reusable-iac-security`) and at pre-commit
-- **Dependency scanning** via Trivy (filesystem) and Dependabot (GitHub Actions)
+- **Dependency scanning** via Trivy (filesystem) and Renovate (GitHub Actions
+  SHA pins, Packer, OPA, and tooling versions)
 - **SHA-pinned GitHub Actions** to prevent supply chain attacks via mutable tags
 
 ### Security Notes for Shipped Examples
