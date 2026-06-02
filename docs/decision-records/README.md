@@ -1,4 +1,4 @@
-# Architecture Decision Records
+﻿# Architecture Decision Records
 
 This directory holds the Architecture Decision Records (ADRs) governing this
 repository. Per [org ADR-0001](org/0001-use-architecture-decision-records.md),
@@ -25,9 +25,10 @@ drift gate.
 | ADR | Status | Decision |
 | --- | --- | --- |
 | [ADR-0001](org/0001-use-architecture-decision-records.md) | Accepted | Use ADRs to document design rationale. |
-| [ADR-0002](org/0002-adopt-diataxis-documentation-framework.md) | Accepted | Use Diátaxis for non-ADR documentation. |
+| [ADR-0002](org/0002-adopt-diataxis-documentation-framework.md) | Accepted | Use DiÃ¡taxis for non-ADR documentation. |
 | [ADR-0003](org/0003-use-deny-all-gitignore-strategy.md) | Accepted | Use deny-all `.gitignore` allowlists. |
 | [ADR-0004](org/0004-use-renovate-for-dependency-updates.md) | Accepted | Use Renovate for dependency updates. |
+| [org/0005](org/0005-keep-github-control-planes-namespace-local.md) | Keep GitHub Control Planes Namespace-Local | Accepted | 2026-06-02 | Use the owning namespace control plane for governance, ADRs, repo hygiene, and reusable workflow callers. |
 
 ## Template ADRs
 
