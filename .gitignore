@@ -67,6 +67,7 @@
 !docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
 !docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
 !docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
+!docs/decision-records/org/0005-keep-github-control-planes-namespace-local.md
 !docs/decision-records/template/
 !docs/decision-records/template/.gitkeep
 !docs/decision-records/repo/
