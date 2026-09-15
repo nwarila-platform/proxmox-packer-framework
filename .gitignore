@@ -139,6 +139,7 @@
 !/.github/workflows/
 !/.github/workflows/org-adr-sync.yaml
 !/.github/workflows/org-adr-auto-sync.yaml
+!/.github/workflows/template-drift.yaml
 !/docs/
 !/docs/decision-records/
 !/docs/decision-records/org/
