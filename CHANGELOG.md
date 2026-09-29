@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/nwarila-platform/proxmox-packer-framework/compare/v0.1.1...v0.1.2) (2026-06-02)
+
+
+### Documentation
+
+* fix packer framework doc accuracy ([#37](https://github.com/nwarila-platform/proxmox-packer-framework/issues/37)) ([3a1afa3](https://github.com/nwarila-platform/proxmox-packer-framework/commit/3a1afa3e05358b53736abd921aa5ecbdbf621e8b))
+
 ## [0.1.1](https://github.com/nwarila-platform/proxmox-packer-framework/compare/v0.1.0...v0.1.1) (2026-05-29)
 
 
